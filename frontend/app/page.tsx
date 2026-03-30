@@ -11,7 +11,7 @@ export default function Home() {
           Secure Whistleblower Portal - Submit and manage anonymous reports
         </p>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
           <Link
             href="/report"
             className="group block p-8 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
@@ -40,6 +40,15 @@ export default function Home() {
             <div className="mt-4 text-white group-hover:translate-x-2 transition-transform">
               →
             </div>
+          </Link>
+        </div>
+
+        <div className="text-center">
+          <Link
+            href="/login"
+            className="inline-block text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Admin Login →
           </Link>
         </div>
       </div>

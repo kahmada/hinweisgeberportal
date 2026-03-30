@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface Report {
   id: number;
@@ -14,14 +15,35 @@ export default function AdminReportsPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
     fetchReports();
   }, []);
 
   const fetchReports = async () => {
+    const token = localStorage.getItem('auth_token');
+    
     try {
-      const response = await fetch('http://localhost:8000/api/reports');
+      const response = await fetch('http://localhost:8000/api/reports', {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.status === 401) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user');
+        router.push('/login');
+        return;
+      }
+      
       if (response.ok) {
         const data = await response.json();
         setReports(data);
@@ -37,15 +59,25 @@ export default function AdminReportsPage() {
   };
 
   const updateStatus = async (id: number, newStatus: string) => {
+    const token = localStorage.getItem('auth_token');
+    
     try {
       const response = await fetch(`http://localhost:8000/api/reports/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ status: newStatus }),
       });
+
+      if (response.status === 401) {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user');
+        router.push('/login');
+        return;
+      }
 
       if (response.ok) {
         setReports(
@@ -61,6 +93,12 @@ export default function AdminReportsPage() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    router.push('/login');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -73,9 +111,17 @@ export default function AdminReportsPage() {
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="bg-white rounded-lg shadow-md p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">
-            Admin Dashboard - Reports
-          </h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Admin Dashboard - Reports
+            </h1>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
 
           {error && (
             <div className="mb-6 p-4 bg-red-50 text-red-800 border border-red-200 rounded-md">
@@ -144,7 +190,7 @@ export default function AdminReportsPage() {
                           onChange={(e) =>
                             updateStatus(report.id, e.target.value)
                           }
-                          className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="border border-gray-300 rounded-md px-2 py-1 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                           <option value="open">Open</option>
                           <option value="under_review">Under Review</option>
