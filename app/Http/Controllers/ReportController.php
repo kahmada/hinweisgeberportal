@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Report;
 use App\Services\AnonymousCredentialsService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class ReportController extends Controller
 {
@@ -87,5 +88,75 @@ class ReportController extends Controller
             'message' => 'Report aktualisiert',
             'report' => $report,
         ]);
+    }
+
+    /**
+     * Show tracking login page with token
+     */
+    public function showTrackingLogin(string $token)
+    {
+        // Verify token exists
+        $report = Report::where('anonymous_token', $token)
+                       ->where('is_anonymous', true)
+                       ->first();
+
+        if (!$report) {
+            abort(404, 'Ungültiger Zugangslink');
+        }
+
+        return view('track.login', compact('token'));
+    }
+
+    /**
+     * Authenticate anonymous whistleblower
+     */
+    public function trackLogin(Request $request)
+    {
+        $validated = $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        $report = Report::where('anonymous_username', $validated['username'])
+                       ->where('is_anonymous', true)
+                       ->first();
+
+        if (!$report || !Hash::check($validated['password'], $report->anonymous_password)) {
+            return back()->withErrors([
+                'credentials' => 'Ungültige Zugangsdaten. Bitte überprüfen Sie Ihren Benutzernamen und Ihr Passwort.'
+            ])->withInput($request->only('username'));
+        }
+
+        // Create session for anonymous whistleblower
+        session([
+            'whistleblower_report_id' => $report->id,
+            'whistleblower_username' => $report->anonymous_username,
+        ]);
+
+        return redirect()->route('report.view', $report->id);
+    }
+
+    /**
+     * View report details (for authenticated whistleblower)
+     */
+    public function viewReport(int $id)
+    {
+        // Check if user has access to this report
+        if (session('whistleblower_report_id') !== $id) {
+            abort(403, 'Zugriff verweigert');
+        }
+
+        $report = Report::findOrFail($id);
+
+        return view('track.view', compact('report'));
+    }
+
+    /**
+     * Logout anonymous whistleblower
+     */
+    public function trackLogout()
+    {
+        session()->forget(['whistleblower_report_id', 'whistleblower_username']);
+        return redirect('/')->with('message', 'Sie wurden erfolgreich abgemeldet.');
     }
 }
