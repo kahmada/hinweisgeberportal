@@ -35,4 +35,9 @@ class Report extends Model
     {
         return $this->hasMany(Message::class);
     }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(Attachment::class);
+    }
 }

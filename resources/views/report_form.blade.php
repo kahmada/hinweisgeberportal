@@ -263,6 +263,13 @@
                         <textarea name="description" required placeholder="Beschreiben Sie den Vorfall so detailliert wie möglich..." style="min-height: 200px;"></textarea>
                     </div>
 
+                    <div class="form-group">
+                        <label>Anhänge hochladen <span class="optional">(optional)</span></label>
+                        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt" style="padding: 10px; border: 2px dashed #e0e0e0;">
+                        <small style="color: #666; display: block; margin-top: 5px;">Max. 5 Dateien, je max. 10MB (PDF, DOC, JPG, PNG, TXT)</small>
+                        <div id="fileList" style="margin-top: 10px;"></div>
+                    </div>
+
                     <div class="button-group">
                         <button type="button" class="btn-secondary" onclick="prevStep()">← Zurück</button>
                         <button type="button" class="btn-primary" onclick="nextStep()">Weiter →</button>
@@ -387,6 +394,8 @@
             e.preventDefault();
             
             const formData = new FormData(this);
+            const files = document.getElementById('fileInput').files;
+            
             const data = {
                 title: formData.get('title'),
                 company: formData.get('company'),
@@ -411,6 +420,11 @@
                 const result = await response.json();
 
                 if(result.success) {
+                    // Upload files if any
+                    if (files.length > 0) {
+                        await uploadFiles(result.report_id, files);
+                    }
+
                     document.getElementById('cred-username').textContent = result.credentials.username;
                     document.getElementById('cred-password').textContent = result.credentials.password;
                     document.getElementById('cred-url').textContent = result.credentials.access_url;
@@ -423,6 +437,44 @@
             } catch(error) {
                 alert('Fehler beim Absenden. Bitte versuchen Sie es erneut.');
             }
+        });
+
+        async function uploadFiles(reportId, files) {
+            const formData = new FormData();
+            for (let i = 0; i < files.length; i++) {
+                formData.append('files[]', files[i]);
+            }
+
+            try {
+                await fetch(`/api/reports/${reportId}/attachments`, {
+                    method: 'POST',
+                    body: formData
+                });
+            } catch(error) {
+                console.error('Error uploading files:', error);
+            }
+        }
+
+        // File input handler
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const fileList = document.getElementById('fileList');
+            const files = e.target.files;
+            
+            if (files.length === 0) {
+                fileList.innerHTML = '';
+                return;
+            }
+
+            let html = '<div style="background: #f9f9f9; padding: 10px; border-radius: 4px;">';
+            html += '<strong>Ausgewählte Dateien:</strong><ul style="margin: 10px 0; padding-left: 20px;">';
+            
+            for (let i = 0; i < files.length; i++) {
+                const size = (files[i].size / 1024).toFixed(2);
+                html += `<li>${files[i].name} (${size} KB)</li>`;
+            }
+            
+            html += '</ul></div>';
+            fileList.innerHTML = html;
         });
 
         function copyText(elementId) {

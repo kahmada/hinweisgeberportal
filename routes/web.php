@@ -21,6 +21,7 @@ Route::post('/report/logout', [ReportController::class, 'trackLogout'])->name('r
 Route::get('/report/{id}/messages', [\App\Http\Controllers\MessageController::class, 'index'])->name('report.messages.index');
 Route::post('/report/{id}/messages', [\App\Http\Controllers\MessageController::class, 'store'])->name('report.messages.store');
 Route::post('/report/{id}/messages/mark-read', [\App\Http\Controllers\MessageController::class, 'markAsRead'])->name('report.messages.read');
+Route::get('/attachments/{id}/download', [\App\Http\Controllers\AttachmentController::class, 'download'])->name('attachments.download');
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('admin.reports');

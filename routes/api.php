@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/reports', [ReportController::class, 'store']);
+Route::post('/reports/{report}/attachments', [\App\Http\Controllers\AttachmentController::class, 'store']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
