@@ -13,14 +13,16 @@ class MessageController extends Controller
      */
     public function index(int $reportId)
     {
+        $report = Report::findOrFail($reportId);
+
         // Check access
         if (auth()->check()) {
-            // Admin access
-            if (!auth()->user()->is_admin) {
+            // Admin access OR registered user accessing their own report
+            if (!auth()->user()->is_admin && $report->user_id !== auth()->id()) {
                 abort(403);
             }
         } else {
-            // Whistleblower access
+            // Anonymous whistleblower access
             if (session('whistleblower_report_id') !== $reportId) {
                 abort(403);
             }
@@ -62,12 +64,12 @@ class MessageController extends Controller
             if ($report->status === 'eingegangen' || $report->status === 'in_pruefung') {
                 $report->update(['status' => 'rueckfrage']);
             }
-        } elseif (session('whistleblower_report_id') === $reportId) {
-            // Whistleblower sending message
+        } elseif (session('whistleblower_report_id') === $reportId || (auth()->check() && $report->user_id === auth()->id())) {
+            // Whistleblower sending message (anonymous OR registered user)
             $message = Message::create([
                 'report_id' => $reportId,
                 'sender_type' => 'whistleblower',
-                'sender_id' => null,
+                'sender_id' => auth()->check() ? auth()->id() : null,
                 'message' => $validated['message'],
                 'is_read' => false,
             ]);
@@ -86,14 +88,16 @@ class MessageController extends Controller
      */
     public function markAsRead(int $reportId)
     {
+        $report = Report::findOrFail($reportId);
+
         if (auth()->check() && auth()->user()->is_admin) {
             // Admin marks whistleblower messages as read
             Message::where('report_id', $reportId)
                 ->where('sender_type', 'whistleblower')
                 ->where('is_read', false)
                 ->update(['is_read' => true]);
-        } elseif (session('whistleblower_report_id') === $reportId) {
-            // Whistleblower marks admin messages as read
+        } elseif (session('whistleblower_report_id') === $reportId || (auth()->check() && $report->user_id === auth()->id())) {
+            // Whistleblower (anonymous OR registered) marks admin messages as read
             Message::where('report_id', $reportId)
                 ->where('sender_type', 'admin')
                 ->where('is_read', false)

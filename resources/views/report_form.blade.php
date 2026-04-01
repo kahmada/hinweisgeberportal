@@ -177,8 +177,22 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔒 Hinweis einreichen</h1>
-            <p>Ihre Meldung wird vertraulich und anonym behandelt</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1 style="margin: 0;">🔒 Hinweis einreichen</h1>
+                <div style="display: flex; gap: 10px;">
+                    @auth
+                        @if(auth()->user()->is_admin)
+                            <a href="{{ route('admin.reports') }}" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;">Admin Dashboard</a>
+                        @else
+                            <a href="{{ route('user.dashboard') }}" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;">Mein Dashboard</a>
+                        @endif
+                    @else
+                        <a href="{{ route('user.login') }}" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;">Anmelden</a>
+                        <a href="{{ route('register') }}" style="background: white; color: #667eea; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 600;">Registrieren</a>
+                    @endauth
+                </div>
+            </div>
+            <p style="opacity: 0.9;">Ihre Meldung wird vertraulich behandelt</p>
         </div>
 
         <div class="progress-bar">
@@ -195,11 +209,31 @@
                     <div class="alert alert-info">
                         <strong>Willkommen beim Hinweisgeberportal</strong><br><br>
                         Dieses Portal ermöglicht es Ihnen, Hinweise auf Missstände oder Rechtsverstöße sicher und vertraulich zu melden.<br><br>
-                        <strong>Ihre Anonymität ist geschützt:</strong><br>
-                        • Sie erhalten automatisch generierte Zugangsdaten<br>
-                        • Keine persönlichen Daten werden gespeichert<br>
-                        • Sichere Kommunikation mit der internen Stelle
+                        <strong>Sie haben zwei Möglichkeiten:</strong><br>
+                        • <strong>Anonym einreichen:</strong> Sie erhalten automatisch generierte Zugangsdaten<br>
+                        • <strong>Mit Ihrem Konto einreichen:</strong> Ihre Identität wird geschützt, aber Sie können sich später anmelden
                     </div>
+
+                    @auth
+                        @if(!auth()->user()->is_admin)
+                            <div class="form-group">
+                                <label style="font-size: 16px; margin-bottom: 15px;">Wie möchten Sie Ihren Hinweis einreichen?</label>
+                                <div style="display: flex; gap: 15px;">
+                                    <label style="flex: 1; border: 2px solid #e0e0e0; padding: 20px; border-radius: 8px; cursor: pointer; transition: all 0.3s;" onclick="setSubmissionType('authenticated')">
+                                        <input type="radio" name="submission_type" value="authenticated" checked style="width: auto; margin-right: 10px;">
+                                        <strong>Mit meinem Konto</strong><br>
+                                        <small style="color: #666;">Angemeldet als {{ auth()->user()->name }}</small>
+                                    </label>
+                                    <label style="flex: 1; border: 2px solid #e0e0e0; padding: 20px; border-radius: 8px; cursor: pointer; transition: all 0.3s;" onclick="setSubmissionType('anonymous')">
+                                        <input type="radio" name="submission_type" value="anonymous" style="width: auto; margin-right: 10px;">
+                                        <strong>Anonym</strong><br>
+                                        <small style="color: #666;">Automatische Zugangsdaten</small>
+                                    </label>
+                                </div>
+                            </div>
+                        @endif
+                    @endauth
+
                     <div class="button-group">
                         <button type="button" class="btn-primary" onclick="nextStep()">Weiter →</button>
                     </div>
@@ -335,6 +369,16 @@
         let currentStep = 1;
         const totalSteps = 4;
 
+        function setSubmissionType(type) {
+            // Visual feedback for selection
+            document.querySelectorAll('label[onclick*="setSubmissionType"]').forEach(label => {
+                label.style.borderColor = '#e0e0e0';
+                label.style.background = 'white';
+            });
+            event.currentTarget.style.borderColor = '#667eea';
+            event.currentTarget.style.background = '#f0f4ff';
+        }
+
         function showStep(step) {
             document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.progress-step').forEach(s => s.classList.remove('active', 'completed'));
@@ -396,6 +440,10 @@
             const formData = new FormData(this);
             const files = document.getElementById('fileInput').files;
             
+            // Check if user is authenticated and wants to submit with their account
+            const submissionType = document.querySelector('input[name="submission_type"]:checked');
+            const isAnonymous = !submissionType || submissionType.value === 'anonymous';
+            
             const data = {
                 title: formData.get('title'),
                 company: formData.get('company'),
@@ -404,7 +452,7 @@
                 incident_location: formData.get('incident_location'),
                 involved_persons: formData.get('involved_persons'),
                 description: formData.get('description'),
-                is_anonymous: true
+                is_anonymous: isAnonymous
             };
 
             try {
@@ -412,7 +460,8 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     },
                     body: JSON.stringify(data)
                 });
@@ -422,17 +471,23 @@
                 if(result.success) {
                     // Upload files if any
                     if (files.length > 0) {
-                        await uploadFiles(result.report_id, files);
+                        await uploadFiles(result.report_id || result.report.id, files);
                     }
 
-                    document.getElementById('cred-username').textContent = result.credentials.username;
-                    document.getElementById('cred-password').textContent = result.credentials.password;
-                    document.getElementById('cred-url').textContent = result.credentials.access_url;
-                    document.getElementById('cred-url').href = result.credentials.access_url;
-                    
-                    currentStep = 5;
-                    showStep(5);
-                    window.scrollTo(0, 0);
+                    if (isAnonymous) {
+                        // Show credentials for anonymous submission
+                        document.getElementById('cred-username').textContent = result.credentials.username;
+                        document.getElementById('cred-password').textContent = result.credentials.password;
+                        document.getElementById('cred-url').textContent = result.credentials.access_url;
+                        document.getElementById('cred-url').href = result.credentials.access_url;
+                        
+                        currentStep = 5;
+                        showStep(5);
+                        window.scrollTo(0, 0);
+                    } else {
+                        // Redirect to user dashboard for authenticated submission
+                        window.location.href = '/user/dashboard';
+                    }
                 }
             } catch(error) {
                 alert('Fehler beim Absenden. Bitte versuchen Sie es erneut.');
