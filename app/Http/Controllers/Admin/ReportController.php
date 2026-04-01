@@ -20,7 +20,7 @@ class ReportController extends Controller
 
     public function show(int $id)
     {
-        $report = Report::with('messages')->findOrFail($id);
+        $report = Report::with(['messages', 'attachments'])->findOrFail($id);
         
         return view('admin.report-detail', compact('report'));
     }

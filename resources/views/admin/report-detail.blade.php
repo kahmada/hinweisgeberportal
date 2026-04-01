@@ -115,6 +115,20 @@
                 <div class="info-label">Beschreibung:</div>
                 <div class="info-value" style="white-space: pre-wrap;">{{ $report->description }}</div>
             </div>
+
+            @if($report->attachments->count() > 0)
+            <div class="info-row">
+                <div class="info-label">Anhänge:</div>
+                <div class="info-value">
+                    @foreach($report->attachments as $attachment)
+                        <div style="background: #f9f9f9; padding: 10px; margin: 5px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                            <span>📎 {{ $attachment->original_filename }} ({{ $attachment->file_size_formatted }})</span>
+                            <a href="{{ route('attachments.download', $attachment->id) }}" style="background: #3b82f6; color: white; padding: 5px 15px; border-radius: 4px; text-decoration: none; font-size: 13px;">Download</a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Communication -->

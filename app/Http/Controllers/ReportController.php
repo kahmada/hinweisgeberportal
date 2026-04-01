@@ -161,7 +161,7 @@ class ReportController extends Controller
             abort(403, 'Zugriff verweigert');
         }
 
-        $report = Report::findOrFail($id);
+        $report = Report::with('attachments')->findOrFail($id);
 
         return view('track.view', compact('report'));
     }
