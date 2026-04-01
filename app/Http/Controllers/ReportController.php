@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Report;
 use App\Services\AnonymousCredentialsService;
 use App\Services\ActivityLogService;
+use App\Http\Requests\StoreReportRequest;
+use App\Http\Requests\UpdateReportRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -25,20 +27,9 @@ class ReportController extends Controller
         return response()->json($reports);
     }
 
-    public function store(Request $request)
+    public function store(StoreReportRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'company' => 'nullable|string|max:255',
-            'violation_type' => 'nullable|string|max:255',
-            'incident_date' => 'nullable|date',
-            'incident_location' => 'nullable|string|max:255',
-            'involved_persons' => 'nullable|string',
-            'description' => 'required|string',
-            'is_anonymous' => 'boolean',
-        ]);
-
-        // Check if this is an anonymous submission
+        $validated = $request->validated();
         $isAnonymous = $request->boolean('is_anonymous', true);
 
         if ($isAnonymous) {
@@ -96,12 +87,9 @@ class ReportController extends Controller
         ], 201);
     }
 
-    public function update(Request $request, Report $report)
+    public function update(UpdateReportRequest $request, Report $report)
     {
-        $validated = $request->validate([
-            'status' => 'required|string|in:eingegangen,in_pruefung,rueckfrage,abgeschlossen',
-        ]);
-
+        $validated = $request->validated();
         $oldStatus = $report->status;
         $report->update($validated);
 

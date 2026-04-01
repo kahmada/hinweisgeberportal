@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Message;
 use App\Models\Report;
 use App\Services\ActivityLogService;
+use App\Http\Requests\StoreMessageRequest;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
@@ -42,11 +43,9 @@ class MessageController extends Controller
     /**
      * Send a message (Admin or Whistleblower)
      */
-    public function store(Request $request, int $reportId)
+    public function store(StoreMessageRequest $request, int $reportId)
     {
-        $validated = $request->validate([
-            'message' => 'required|string|max:5000',
-        ]);
+        $validated = $request->validated();
 
         $report = Report::findOrFail($reportId);
 
