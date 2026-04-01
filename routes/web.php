@@ -23,9 +23,8 @@ Route::post('/report/{id}/messages', [\App\Http\Controllers\MessageController::c
 Route::post('/report/{id}/messages/mark-read', [\App\Http\Controllers\MessageController::class, 'markAsRead'])->name('report.messages.read');
 
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/reports', function () {
-        return view('admin.reports');
-    })->name('admin.reports');
+    Route::get('/admin/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('admin.reports');
+    Route::get('/admin/reports/{id}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('admin.reports.show');
 });
 
 require __DIR__.'/auth.php';
