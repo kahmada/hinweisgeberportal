@@ -33,6 +33,10 @@
         .send-btn { background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; align-self: flex-end; }
         .send-btn:hover { background: #2563eb; }
         .full-width { grid-column: 1 / -1; }
+        .log-item { padding: 10px 0; border-bottom: 1px solid #f0f0f0; display: flex; gap: 15px; align-items: flex-start; }
+        .log-item:last-child { border-bottom: none; }
+        .log-icon { font-size: 18px; width: 30px; text-align: center; flex-shrink: 0; }
+        .log-meta { font-size: 12px; color: #999; margin-top: 3px; }
     </style>
 </head>
 <body>
@@ -156,8 +160,7 @@
 
         <!-- Communication -->
         <div class="card">
-            <h2>💬 Kommunikation</h2>
-            
+            <h2>💬 Kommunikation</h2>            
             <div id="messages-container" class="messages-container">
                 <p style="text-align: center; color: #999;">Nachrichten werden geladen...</p>
             </div>
@@ -369,5 +372,41 @@
         // Auto-refresh every 10 seconds
         setInterval(loadMessages, 10000);
     </script>
+
+    {{-- Activity Log --}}
+    <div style="max-width: 1200px; margin: 0 auto 2rem; padding: 0 2rem;">
+        <div class="card full-width">
+            <h2>📋 Aktivitätsprotokoll</h2>
+            @forelse($activityLogs as $log)
+                <div class="log-item">
+                    <div class="log-icon">
+                        @switch($log->action)
+                            @case('status_changed') 🔄 @break
+                            @case('identity_revealed') 🔓 @break
+                            @case('report_accessed') 👁️ @break
+                            @case('message_sent') 💬 @break
+                            @default ⚙️
+                        @endswitch
+                    </div>
+                    <div>
+                        <div>
+                            <strong>{{ $log->action_label }}</strong>
+                            @if($log->old_value && $log->new_value)
+                                <span style="color: #999;">→</span>
+                                <span style="background: #fef3c7; padding: 2px 8px; border-radius: 4px; font-size: 12px;">{{ $log->old_value }}</span>
+                                <span style="color: #999;">→</span>
+                                <span style="background: #d1fae5; padding: 2px 8px; border-radius: 4px; font-size: 12px;">{{ $log->new_value }}</span>
+                            @endif
+                        </div>
+                        <div class="log-meta">
+                            {{ $log->user?->name ?? 'System' }} &bull; {{ $log->created_at->format('d.m.Y H:i') }} Uhr &bull; IP: {{ $log->ip_address ?? '-' }}
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <p style="color: #999; text-align: center; padding: 20px;">Noch keine Aktivitäten protokolliert.</p>
+            @endforelse
+        </div>
+    </div>
 </body>
 </html>

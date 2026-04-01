@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Services\AnonymousCredentialsService;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -101,7 +102,15 @@ class ReportController extends Controller
             'status' => 'required|string|in:eingegangen,in_pruefung,rueckfrage,abgeschlossen',
         ]);
 
+        $oldStatus = $report->status;
         $report->update($validated);
+
+        ActivityLogService::log(
+            $report->id,
+            'status_changed',
+            $oldStatus,
+            $validated['status']
+        );
 
         return response()->json([
             'success' => true,
@@ -211,6 +220,8 @@ class ReportController extends Controller
         ]);
 
         $report->load('user');
+
+        ActivityLogService::log($report->id, 'identity_revealed');
 
         return response()->json([
             'success' => true,

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Message;
 use App\Models\Report;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
@@ -60,10 +61,11 @@ class MessageController extends Controller
                 'is_read' => false,
             ]);
 
-            // Update report status to 'rueckfrage' if needed
             if ($report->status === 'eingegangen' || $report->status === 'in_pruefung') {
                 $report->update(['status' => 'rueckfrage']);
             }
+
+            ActivityLogService::log($reportId, 'message_sent', null, 'admin');
         } elseif (session('whistleblower_report_id') === $reportId || (auth()->check() && $report->user_id === auth()->id())) {
             // Whistleblower sending message (anonymous OR registered user)
             $message = Message::create([
