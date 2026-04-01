@@ -9,6 +9,11 @@ class Report extends Model
     protected $fillable = [
         'user_id',
         'title',
+        'company',
+        'violation_type',
+        'incident_date',
+        'incident_location',
+        'involved_persons',
         'description',
         'status',
         'is_anonymous',

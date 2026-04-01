@@ -23,12 +23,17 @@ class ReportController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'violation_type' => 'nullable|string|max:255',
+            'incident_date' => 'nullable|date',
+            'incident_location' => 'nullable|string|max:255',
+            'involved_persons' => 'nullable|string',
             'description' => 'required|string',
             'is_anonymous' => 'boolean',
         ]);
 
         // Check if this is an anonymous submission
-        $isAnonymous = $request->boolean('is_anonymous', true); // Default to anonymous
+        $isAnonymous = $request->boolean('is_anonymous', true);
 
         if ($isAnonymous) {
             // Generate anonymous credentials
@@ -36,6 +41,11 @@ class ReportController extends Controller
 
             $report = Report::create([
                 'title' => $validated['title'],
+                'company' => $validated['company'] ?? null,
+                'violation_type' => $validated['violation_type'] ?? null,
+                'incident_date' => $validated['incident_date'] ?? null,
+                'incident_location' => $validated['incident_location'] ?? null,
+                'involved_persons' => $validated['involved_persons'] ?? null,
                 'description' => $validated['description'],
                 'is_anonymous' => true,
                 'anonymous_username' => $credentials['username'],
@@ -51,7 +61,7 @@ class ReportController extends Controller
                 'report_id' => $report->id,
                 'credentials' => [
                     'username' => $credentials['username'],
-                    'password' => $credentials['password'], // Plain text
+                    'password' => $credentials['password'],
                     'access_token' => $credentials['token'],
                     'access_url' => url("/track/{$credentials['token']}"),
                 ],
@@ -59,10 +69,15 @@ class ReportController extends Controller
             ], 201);
         }
 
-        // For registered users (future implementation)
+        // For registered users
         $report = Report::create([
             'user_id' => auth()->id(),
             'title' => $validated['title'],
+            'company' => $validated['company'] ?? null,
+            'violation_type' => $validated['violation_type'] ?? null,
+            'incident_date' => $validated['incident_date'] ?? null,
+            'incident_location' => $validated['incident_location'] ?? null,
+            'involved_persons' => $validated['involved_persons'] ?? null,
             'description' => $validated['description'],
             'is_anonymous' => false,
             'status' => 'eingegangen',
