@@ -46,6 +46,13 @@
         <div class="card">
             <h2>Hinweis-Details</h2>
             
+            @if($report->is_anonymous)
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                <strong>🔒 Anonymer Hinweis</strong><br>
+                <small>Dieser Hinweis wurde anonym eingereicht. Keine persönlichen Daten des Hinweisgebers sind verfügbar.</small>
+            </div>
+            @endif
+            
             <div class="info-row">
                 <div class="info-label">Status:</div>
                 <div class="info-value">

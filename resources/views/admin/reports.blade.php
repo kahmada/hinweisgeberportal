@@ -61,6 +61,23 @@
         </div>
 
         <div class="reports-table">
+            <div style="padding: 1.5rem; border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <label style="font-weight: 600; color: #374151;">Filter:</label>
+                    <select id="statusFilter" style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 4px;">
+                        <option value="">Alle Status</option>
+                        <option value="eingegangen">Eingegangen</option>
+                        <option value="in_pruefung">In Prüfung</option>
+                        <option value="rueckfrage">Rückfrage</option>
+                        <option value="abgeschlossen">Abgeschlossen</option>
+                    </select>
+                    <select id="typeFilter" style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 4px;">
+                        <option value="">Alle Typen</option>
+                        <option value="anonymous">Nur Anonyme</option>
+                        <option value="registered">Nur Registrierte</option>
+                    </select>
+                </div>
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -82,8 +99,11 @@
                             @if($report->unread_messages_count > 0)
                                 <span class="badge">{{ $report->unread_messages_count }}</span>
                             @endif
+                            @if($report->is_anonymous)
+                                <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; margin-left: 8px;">Anonym</span>
+                            @endif
                         </td>
-                        <td>{{ $report->company ?? '-' }}</td>
+                        <td>{{ $report->company ? Str::limit($report->company, 20) : '-' }}</td>
                         <td>{{ $report->violation_type ?? '-' }}</td>
                         <td>
                             <span class="status-badge status-{{ $report->status }}">
@@ -106,5 +126,45 @@
             </table>
         </div>
     </div>
+
+    <script>
+        // Filter functionality
+        const statusFilter = document.getElementById('statusFilter');
+        const typeFilter = document.getElementById('typeFilter');
+        const rows = document.querySelectorAll('tbody tr');
+
+        function applyFilters() {
+            const statusValue = statusFilter.value;
+            const typeValue = typeFilter.value;
+
+            rows.forEach(row => {
+                if (row.querySelector('td[colspan]')) return; // Skip empty row
+
+                const statusBadge = row.querySelector('.status-badge');
+                const anonymousBadge = row.textContent.includes('Anonym');
+                
+                let showRow = true;
+
+                // Status filter
+                if (statusValue && statusBadge) {
+                    showRow = statusBadge.classList.contains(`status-${statusValue}`);
+                }
+
+                // Type filter
+                if (typeValue && showRow) {
+                    if (typeValue === 'anonymous') {
+                        showRow = anonymousBadge;
+                    } else if (typeValue === 'registered') {
+                        showRow = !anonymousBadge;
+                    }
+                }
+
+                row.style.display = showRow ? '' : 'none';
+            });
+        }
+
+        statusFilter.addEventListener('change', applyFilters);
+        typeFilter.addEventListener('change', applyFilters);
+    </script>
 </body>
 </html>
