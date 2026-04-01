@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Mein Hinweis - Hinweisgeberportal</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -212,8 +213,184 @@
 
         <div class="card">
             <h2>💬 Kommunikation</h2>
-            <p style="color: #666;">Die Kommunikationsfunktion wird in Kürze verfügbar sein.</p>
+            
+            <div id="messages-container" style="max-height: 400px; overflow-y: auto; margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                <p style="text-align: center; color: #999;">Nachrichten werden geladen...</p>
+            </div>
+
+            <form id="messageForm" style="display: flex; gap: 10px;">
+                @csrf
+                <textarea 
+                    id="messageInput" 
+                    name="message" 
+                    placeholder="Ihre Nachricht eingeben..." 
+                    style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px; resize: vertical; min-height: 60px;"
+                    required
+                ></textarea>
+                <button 
+                    type="submit" 
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; align-self: flex-end;"
+                >
+                    Senden
+                </button>
+            </form>
         </div>
     </div>
+
+    <style>
+        .message-item {
+            margin: 15px 0;
+            padding: 12px 15px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+        .message-whistleblower {
+            background: #e3f2fd;
+            margin-left: auto;
+            border-left: 4px solid #2196f3;
+        }
+        .message-admin {
+            background: #f3e5f5;
+            margin-right: auto;
+            border-left: 4px solid #9c27b0;
+        }
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+        .message-sender {
+            font-weight: 600;
+        }
+        .message-time {
+            font-style: italic;
+        }
+        .message-text {
+            color: #333;
+            line-height: 1.5;
+        }
+    </style>
+
+    <script>
+        const reportId = {{ $report->id }};
+        let messageCheckInterval;
+
+        // Load messages
+        async function loadMessages() {
+            try {
+                const response = await fetch(`/report/${reportId}/messages`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayMessages(data.messages);
+                    markMessagesAsRead();
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        // Display messages
+        function displayMessages(messages) {
+            const container = document.getElementById('messages-container');
+            
+            if (messages.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">Noch keine Nachrichten. Starten Sie die Konversation!</p>';
+                return;
+            }
+
+            container.innerHTML = messages.map(msg => {
+                const isWhistleblower = msg.sender_type === 'whistleblower';
+                const date = new Date(msg.created_at);
+                const formattedDate = date.toLocaleString('de-DE', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `
+                    <div class="message-item message-${msg.sender_type}">
+                        <div class="message-header">
+                            <span class="message-sender">${isWhistleblower ? 'Sie' : 'Administrator'}</span>
+                            <span class="message-time">${formattedDate}</span>
+                        </div>
+                        <div class="message-text">${escapeHtml(msg.message)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Send message
+        document.getElementById('messageForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message) return;
+
+            try {
+                const response = await fetch(`/report/${reportId}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    messageInput.value = '';
+                    loadMessages();
+                } else {
+                    alert('Fehler beim Senden der Nachricht');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Fehler beim Senden der Nachricht');
+            }
+        });
+
+        // Mark messages as read
+        async function markMessagesAsRead() {
+            try {
+                await fetch(`/report/${reportId}/messages/mark-read`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                });
+            } catch (error) {
+                console.error('Error marking messages as read:', error);
+            }
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Load messages on page load
+        loadMessages();
+
+        // Auto-refresh messages every 10 seconds
+        messageCheckInterval = setInterval(loadMessages, 10000);
+
+        // Clear interval on page unload
+        window.addEventListener('beforeunload', () => {
+            clearInterval(messageCheckInterval);
+        });
+    </script>
 </body>
 </html>
