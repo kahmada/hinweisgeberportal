@@ -7,8 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/reports', [ReportController::class, 'store']);
-Route::post('/reports/{report}/attachments', [\App\Http\Controllers\AttachmentController::class, 'store']);
+Route::post('/reports', [ReportController::class, 'store'])->middleware('throttle:5,60');
+Route::post('/reports/{report}/attachments', [\App\Http\Controllers\AttachmentController::class, 'store'])->middleware('throttle:10,60');
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);

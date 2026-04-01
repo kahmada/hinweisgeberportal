@@ -26,7 +26,7 @@ Route::middleware(['auth'])->prefix('user')->name('user.')->group(function () {
 
 // Anonymous whistleblower tracking routes
 Route::get('/track/{token}', [ReportController::class, 'showTrackingLogin'])->name('report.track');
-Route::post('/track/login', [ReportController::class, 'trackLogin'])->name('report.track.login');
+Route::post('/track/login', [ReportController::class, 'trackLogin'])->name('report.track.login')->middleware('throttle:10,1');
 Route::get('/report/view/{id}', [ReportController::class, 'viewReport'])->name('report.view');
 Route::post('/report/logout', [ReportController::class, 'trackLogout'])->name('report.logout');
 
