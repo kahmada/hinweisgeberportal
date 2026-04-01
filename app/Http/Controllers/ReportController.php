@@ -179,4 +179,48 @@ class ReportController extends Controller
         session()->forget(['whistleblower_report_id', 'whistleblower_username']);
         return redirect('/')->with('message', 'Sie wurden erfolgreich abgemeldet.');
     }
+
+    /**
+     * Reveal identity of a registered user (Admin only)
+     */
+    public function revealIdentity(Request $request, Report $report)
+    {
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            abort(403, 'Zugriff verweigert');
+        }
+
+        if ($report->is_anonymous) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dieser Hinweis ist anonym. Es gibt keine Identität zu enthüllen.',
+            ], 400);
+        }
+
+        if ($report->isIdentityRevealed()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Identität wurde bereits enthüllt.',
+                'revealed_at' => $report->identity_revealed_at,
+                'revealed_by' => $report->revealedBy?->name,
+            ], 400);
+        }
+
+        $report->update([
+            'identity_revealed_at' => now(),
+            'identity_revealed_by' => auth()->id(),
+        ]);
+
+        $report->load('user');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Identität wurde enthüllt',
+            'user' => [
+                'name' => $report->user?->name,
+                'email' => $report->user?->email,
+            ],
+            'revealed_at' => $report->identity_revealed_at,
+            'revealed_by' => auth()->user()->name,
+        ]);
+    }
 }

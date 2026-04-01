@@ -16,6 +16,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
     Route::get('/reports', [ReportController::class, 'index']);
     Route::patch('/reports/{report}', [ReportController::class, 'update']);
+    Route::post('/reports/{report}/reveal-identity', [ReportController::class, 'revealIdentity']);
     
     // Messages (Admin)
     Route::get('/reports/{report}/messages', [MessageController::class, 'index']);

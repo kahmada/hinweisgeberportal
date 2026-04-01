@@ -51,6 +51,29 @@
                 <strong>🔒 Anonymer Hinweis</strong><br>
                 <small>Dieser Hinweis wurde anonym eingereicht. Keine persönlichen Daten des Hinweisgebers sind verfügbar.</small>
             </div>
+            @else
+                @if(!$report->isIdentityRevealed())
+                <div style="background: #e0e7ff; border-left: 4px solid #6366f1; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                    <strong>🔒 Identität geschützt</strong><br>
+                    <small>Dieser Hinweis wurde von einem registrierten Benutzer eingereicht. Die Identität ist standardmäßig geschützt.</small>
+                    <br><br>
+                    <button onclick="confirmRevealIdentity()" style="background: #dc2626; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                        🔓 Identität enthüllen
+                    </button>
+                </div>
+                @else
+                <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                    <strong>⚠️ Identität enthüllt</strong><br>
+                    <div id="identity-info">
+                        <p style="margin-top: 10px;"><strong>Name:</strong> {{ $report->user?->name ?? 'Unbekannt' }}</p>
+                        <p><strong>E-Mail:</strong> {{ $report->user?->email ?? 'Unbekannt' }}</p>
+                        <p style="margin-top: 10px; font-size: 12px; color: #666;">
+                            Enthüllt am {{ $report->identity_revealed_at->format('d.m.Y H:i') }} Uhr 
+                            von {{ $report->revealedBy?->name ?? 'Unbekannt' }}
+                        </p>
+                    </div>
+                </div>
+                @endif
             @endif
             
             <div class="info-row">
@@ -297,6 +320,47 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // Reveal identity with confirmation
+        async function confirmRevealIdentity() {
+            const confirmed = confirm(
+                '⚠️ WARNUNG: Identität enthüllen\n\n' +
+                'Sie sind dabei, die Identität des Hinweisgebers zu enthüllen.\n\n' +
+                '• Diese Aktion wird protokolliert\n' +
+                '• Sie kann nicht rückgängig gemacht werden\n' +
+                '• Der Hinweisgeber wird NICHT benachrichtigt\n\n' +
+                'Möchten Sie fortfahren?'
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/reports/${reportId}/reveal-identity`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Identität wurde erfolgreich enthüllt');
+                    location.reload(); // Reload to show the revealed identity
+                } else {
+                    alert('❌ Fehler: ' + (data.message || 'Identität konnte nicht enthüllt werden'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Fehler beim Enthüllen der Identität');
+            }
         }
 
         // Load messages on page load

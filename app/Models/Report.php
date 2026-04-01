@@ -21,6 +21,8 @@ class Report extends Model
         'anonymous_username',
         'anonymous_password',
         'anonymous_token',
+        'identity_revealed_at',
+        'identity_revealed_by',
     ];
 
     protected $hidden = [
@@ -29,7 +31,18 @@ class Report extends Model
 
     protected $casts = [
         'is_anonymous' => 'boolean',
+        'identity_revealed_at' => 'datetime',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function revealedBy()
+    {
+        return $this->belongsTo(User::class, 'identity_revealed_by');
+    }
 
     public function messages(): HasMany
     {
@@ -39,5 +52,29 @@ class Report extends Model
     public function attachments(): HasMany
     {
         return $this->hasMany(Attachment::class);
+    }
+
+    /**
+     * Check if identity has been revealed
+     */
+    public function isIdentityRevealed(): bool
+    {
+        return !is_null($this->identity_revealed_at);
+    }
+
+    /**
+     * Get anonymized user info (for admin display)
+     */
+    public function getAnonymizedUserAttribute()
+    {
+        if ($this->is_anonymous) {
+            return 'Anonym';
+        }
+
+        if ($this->isIdentityRevealed()) {
+            return $this->user ? $this->user->name . ' (' . $this->user->email . ')' : 'Unbekannt';
+        }
+
+        return '[Identität geschützt]';
     }
 }

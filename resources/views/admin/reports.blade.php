@@ -83,6 +83,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Titel</th>
+                        <th>Hinweisgeber</th>
                         <th>Gesellschaft</th>
                         <th>Verstoß</th>
                         <th>Status</th>
@@ -99,8 +100,14 @@
                             @if($report->unread_messages_count > 0)
                                 <span class="badge">{{ $report->unread_messages_count }}</span>
                             @endif
+                        </td>
+                        <td>
                             @if($report->is_anonymous)
-                                <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; margin-left: 8px;">Anonym</span>
+                                <span style="background: #10b981; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem;">🔒 Anonym</span>
+                            @elseif($report->isIdentityRevealed())
+                                <span style="color: #dc2626; font-weight: 600;">🔓 {{ $report->user?->name ?? 'Unbekannt' }}</span>
+                            @else
+                                <span style="color: #6366f1; font-weight: 600;">🔒 [Geschützt]</span>
                             @endif
                         </td>
                         <td>{{ $report->company ? Str::limit($report->company, 20) : '-' }}</td>
@@ -117,7 +124,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 2rem; color: #999;">
+                        <td colspan="8" style="text-align: center; padding: 2rem; color: #999;">
                             Keine Hinweise vorhanden
                         </td>
                     </tr>

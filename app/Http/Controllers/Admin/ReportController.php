@@ -9,18 +9,19 @@ class ReportController extends Controller
 {
     public function index()
     {
-        $reports = Report::withCount(['messages as unread_messages_count' => function ($query) {
-            $query->where('sender_type', 'whistleblower')->where('is_read', false);
-        }])
-        ->orderBy('created_at', 'desc')
-        ->get();
+        $reports = Report::with(['user'])
+            ->withCount(['messages as unread_messages_count' => function ($query) {
+                $query->where('sender_type', 'whistleblower')->where('is_read', false);
+            }])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('admin.reports', compact('reports'));
     }
 
     public function show(int $id)
     {
-        $report = Report::with(['messages', 'attachments'])->findOrFail($id);
+        $report = Report::with(['messages', 'attachments', 'user', 'revealedBy'])->findOrFail($id);
         
         return view('admin.report-detail', compact('report'));
     }
