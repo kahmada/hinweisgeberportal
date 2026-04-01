@@ -4,7 +4,7 @@ use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return ['Laravel' => app()->version()];
+    return view('report_form');
 });
 
 Route::get('/login', function () {
