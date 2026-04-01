@@ -18,6 +18,16 @@ class AttachmentController extends Controller
         ]);
 
         $report = Report::findOrFail($reportId);
+
+        // Check access: admin OR whistleblower with matching session
+        if (auth()->check() && auth()->user()->is_admin) {
+            // Admin can upload to any report
+        } elseif (session('whistleblower_report_id') === $reportId) {
+            // Whistleblower can upload to their own report
+        } else {
+            abort(403, 'Zugriff verweigert');
+        }
+
         $uploadedFiles = [];
 
         foreach ($request->file('files') as $file) {

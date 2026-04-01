@@ -15,6 +15,11 @@ class ReportController extends Controller
 
     public function index()
     {
+        // Only admins can list all reports
+        if (!auth()->check() || !auth()->user()->is_admin) {
+            abort(403, 'Zugriff verweigert');
+        }
+
         $reports = Report::latest()->get();
         return response()->json($reports);
     }

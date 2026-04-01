@@ -154,16 +154,16 @@
 
     <script>
         const reportId = {{ $report->id }};
-        const apiToken = '{{ auth()->user()->createToken("admin-token")->plainTextToken }}';
 
         // Load messages
         async function loadMessages() {
             try {
                 const response = await fetch(`/api/reports/${reportId}/messages`, {
                     headers: {
-                        'Authorization': `Bearer ${apiToken}`,
-                        'Accept': 'application/json'
-                    }
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
                 });
                 const data = await response.json();
                 
@@ -224,9 +224,11 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiToken}`,
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify({ message })
                 });
 
@@ -250,9 +252,11 @@
                 await fetch(`/api/reports/${reportId}/messages/mark-read`, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${apiToken}`,
-                        'Accept': 'application/json'
-                    }
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
                 });
             } catch (error) {
                 console.error('Error:', error);
@@ -268,9 +272,11 @@
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiToken}`,
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify({ status })
                 });
 
