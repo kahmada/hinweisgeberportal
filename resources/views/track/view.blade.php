@@ -165,6 +165,41 @@
                 <div class="info-value"><strong>{{ $report->title }}</strong></div>
             </div>
 
+            @if($report->company)
+            <div class="info-row">
+                <div class="info-label">Gesellschaft:</div>
+                <div class="info-value">{{ $report->company }}</div>
+            </div>
+            @endif
+
+            @if($report->violation_type)
+            <div class="info-row">
+                <div class="info-label">Art des Verstoßes:</div>
+                <div class="info-value">{{ $report->violation_type }}</div>
+            </div>
+            @endif
+
+            @if($report->incident_date)
+            <div class="info-row">
+                <div class="info-label">Datum des Vorfalls:</div>
+                <div class="info-value">{{ \Carbon\Carbon::parse($report->incident_date)->format('d.m.Y') }}</div>
+            </div>
+            @endif
+
+            @if($report->incident_location)
+            <div class="info-row">
+                <div class="info-label">Ort des Vorfalls:</div>
+                <div class="info-value">{{ $report->incident_location }}</div>
+            </div>
+            @endif
+
+            @if($report->involved_persons)
+            <div class="info-row">
+                <div class="info-label">Beteiligte Personen:</div>
+                <div class="info-value">{{ $report->involved_persons }}</div>
+            </div>
+            @endif
+
             <div class="info-row">
                 <div class="info-label">Beschreibung:</div>
                 <div class="info-value">
