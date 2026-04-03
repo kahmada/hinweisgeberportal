@@ -5,363 +5,349 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Hinweis einreichen - Hinweisgeberportal</title>
+    <link rel="stylesheet" href="/css/portal.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: system-ui, -apple-system, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container { 
-            max-width: 800px; 
-            margin: 0 auto;
-            background: white; 
-            border-radius: 12px; 
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-        .header h1 { font-size: 28px; margin-bottom: 10px; }
-        .header p { opacity: 0.9; }
-        .progress-bar {
+        body { background: var(--bg); }
+
+        .site-header {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            height: 56px;
             display: flex;
-            background: #f5f5f5;
-            padding: 20px;
+            align-items: center;
             justify-content: space-between;
         }
-        .progress-step {
+
+        .form-wrapper {
+            max-width: 680px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .step-item.active { color: var(--primary); font-weight: 600; }
+        .step-item.completed { color: var(--success); }
+
+        .step-num {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .step-item.active .step-num {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .step-item.completed .step-num {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .step-divider {
             flex: 1;
-            text-align: center;
-            padding: 10px;
-            position: relative;
+            height: 1px;
+            background: var(--border);
+            margin: 0 8px;
         }
-        .progress-step.active {
-            color: #667eea;
-            font-weight: 600;
+
+        .step-panel { display: none; }
+        .step-panel.active { display: block; }
+
+        .choice-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
         }
-        .progress-step.completed {
-            color: #4caf50;
+
+        .choice-card:hover { border-color: var(--primary); background: var(--primary-light); }
+        .choice-card.selected { border-color: var(--primary); background: var(--primary-light); }
+        .choice-card input[type="radio"] { display: none; }
+
+        .credentials-table {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin: 1rem 0;
         }
-        .form-content {
-            padding: 40px;
-        }
-        .step {
-            display: none;
-        }
-        .step.active {
-            display: block;
-        }
-        .form-group {
-            margin-bottom: 25px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-        }
-        label .optional {
-            font-weight: normal;
-            color: #999;
+
+        .credentials-table tr td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
             font-size: 13px;
         }
-        input, textarea, select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: border-color 0.3s;
-        }
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-        .button-group {
-            display: flex;
-            gap: 15px;
-            margin-top: 30px;
-        }
-        button {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        .btn-secondary {
-            background: #f5f5f5;
-            color: #666;
-        }
-        .btn-secondary:hover {
-            background: #e0e0e0;
-        }
-        .alert {
-            padding: 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
-        .alert-info {
-            background: #e3f2fd;
-            color: #1565c0;
-            border-left: 4px solid #2196f3;
-        }
-        .alert-success {
-            background: #e8f5e9;
-            color: #2e7d32;
-            border-left: 4px solid #4caf50;
-        }
-        .credentials-box {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-        .credentials-box h3 {
-            color: #856404;
-            margin-bottom: 15px;
-        }
-        .credential-item {
-            background: white;
-            padding: 12px;
-            border-radius: 4px;
-            margin: 10px 0;
-            font-family: monospace;
-            font-size: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+
+        .credentials-table tr:last-child td { border-bottom: none; }
+        .credentials-table td:first-child { font-weight: 500; color: var(--text-muted); width: 130px; }
+        .credentials-table td:last-child { font-family: monospace; font-size: 14px; }
+
         .copy-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 6px 12px;
+            background: none;
+            border: 1px solid var(--border);
             border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 11px;
             cursor: pointer;
-            font-size: 12px;
+            color: var(--text-muted);
+            margin-left: 8px;
         }
-        .warning-box {
-            background: #ffebee;
-            border-left: 4px solid #f44336;
-            padding: 15px;
-            margin-top: 15px;
-            border-radius: 4px;
+
+        .copy-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 1.5rem;
         }
-        .hidden { display: none; }
+
+        .review-block {
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .review-row {
+            display: flex;
+            gap: 12px;
+            padding: 6px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .review-row:last-child { border-bottom: none; }
+        .review-key { font-weight: 500; color: var(--text-muted); width: 140px; flex-shrink: 0; }
+        .review-val { color: var(--text); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h1 style="margin: 0;">🔒 Hinweis einreichen</h1>
-                <div style="display: flex; gap: 10px;">
-                    @auth
-                        @if(auth()->user()->is_admin)
-                            <a href="{{ route('admin.reports') }}" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;">Admin Dashboard</a>
-                        @else
-                            <a href="{{ route('user.dashboard') }}" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;">Mein Dashboard</a>
-                        @endif
-                    @else
-                        <a href="{{ route('user.login') }}" style="background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px;">Anmelden</a>
-                        <a href="{{ route('register') }}" style="background: white; color: #667eea; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 600;">Registrieren</a>
-                    @endauth
-                </div>
+    <header class="site-header">
+        <a href="/" style="font-size: 15px; font-weight: 700; color: #005FB8; text-decoration: none;">Hinweisgeberportal</a>
+        <nav style="display: flex; gap: 8px; align-items: center;">
+            @auth
+                @if(auth()->user()->is_admin)
+                    <a href="{{ route('admin.reports') }}" class="btn btn-secondary btn-sm">Admin-Bereich</a>
+                @else
+                    <a href="{{ route('user.dashboard') }}" class="btn btn-secondary btn-sm">Meine Hinweise</a>
+                @endif
+            @else
+                <a href="{{ route('user.login') }}" class="btn btn-secondary btn-sm">Anmelden</a>
+                <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Registrieren</a>
+            @endauth
+        </nav>
+    </header>
+
+    <div class="form-wrapper">
+        <div class="card">
+            <div class="card-header" style="background: #005FB8; color: white; border-radius: 6px 6px 0 0; border: none;">
+                <div style="font-size: 16px; font-weight: 700;">Hinweis einreichen</div>
+                <div style="font-size: 12px; font-weight: 400; opacity: 0.85; margin-top: 2px;">Ihre Meldung wird vertraulich behandelt</div>
             </div>
-            <p style="opacity: 0.9;">Ihre Meldung wird vertraulich behandelt</p>
-        </div>
 
-        <div class="progress-bar">
-            <div class="progress-step active" data-step="1">① Aufklärung</div>
-            <div class="progress-step" data-step="2">② Bericht erstellen</div>
-            <div class="progress-step" data-step="3">③ Ihre Daten</div>
-            <div class="progress-step" data-step="4">④ Überprüfen</div>
-        </div>
-
-        <div class="form-content">
-            <form id="reportForm">
-                <!-- Step 1: Info -->
-                <div class="step active" data-step="1">
-                    <div class="alert alert-info">
-                        <strong>Willkommen beim Hinweisgeberportal</strong><br><br>
-                        Dieses Portal ermöglicht es Ihnen, Hinweise auf Missstände oder Rechtsverstöße sicher und vertraulich zu melden.<br><br>
-                        <strong>Sie haben zwei Möglichkeiten:</strong><br>
-                        • <strong>Anonym einreichen:</strong> Sie erhalten automatisch generierte Zugangsdaten<br>
-                        • <strong>Mit Ihrem Konto einreichen:</strong> Ihre Identität wird geschützt, aber Sie können sich später anmelden
+            <div class="card-body">
+                <!-- Step Indicator -->
+                <div class="step-indicator" id="stepIndicator">
+                    <div class="step-item active" data-step="1">
+                        <div class="step-num">1</div>
+                        <span>Information</span>
                     </div>
+                    <div class="step-divider"></div>
+                    <div class="step-item" data-step="2">
+                        <div class="step-num">2</div>
+                        <span>Vorfall</span>
+                    </div>
+                    <div class="step-divider"></div>
+                    <div class="step-item" data-step="3">
+                        <div class="step-num">3</div>
+                        <span>Details</span>
+                    </div>
+                    <div class="step-divider"></div>
+                    <div class="step-item" data-step="4">
+                        <div class="step-num">4</div>
+                        <span>Prüfen</span>
+                    </div>
+                </div>
 
-                    @auth
-                        @if(!auth()->user()->is_admin)
-                            <div class="form-group">
-                                <label style="font-size: 16px; margin-bottom: 15px;">Wie möchten Sie Ihren Hinweis einreichen?</label>
-                                <div style="display: flex; gap: 15px;">
-                                    <label style="flex: 1; border: 2px solid #e0e0e0; padding: 20px; border-radius: 8px; cursor: pointer; transition: all 0.3s;" onclick="setSubmissionType('authenticated')">
-                                        <input type="radio" name="submission_type" value="authenticated" checked style="width: auto; margin-right: 10px;">
-                                        <strong>Mit meinem Konto</strong><br>
-                                        <small style="color: #666;">Angemeldet als {{ auth()->user()->name }}</small>
-                                    </label>
-                                    <label style="flex: 1; border: 2px solid #e0e0e0; padding: 20px; border-radius: 8px; cursor: pointer; transition: all 0.3s;" onclick="setSubmissionType('anonymous')">
-                                        <input type="radio" name="submission_type" value="anonymous" style="width: auto; margin-right: 10px;">
-                                        <strong>Anonym</strong><br>
-                                        <small style="color: #666;">Automatische Zugangsdaten</small>
-                                    </label>
+                <form id="reportForm">
+                    <!-- Step 1 -->
+                    <div class="step-panel active" data-step="1">
+                        <div class="alert alert-info" style="margin-bottom: 1.25rem;">
+                            <strong>Willkommen beim Hinweisgeberportal</strong><br>
+                            Dieses Portal ermöglicht es Ihnen, Hinweise auf Missstände oder Rechtsverstöße sicher und vertraulich zu melden. Alle Angaben werden streng vertraulich behandelt.
+                        </div>
+
+                        @auth
+                            @if(!auth()->user()->is_admin)
+                                <div class="form-group">
+                                    <label class="form-label">Einreichungsart</label>
+                                    <div style="display: flex; gap: 10px;">
+                                        <label class="choice-card selected" style="flex: 1;" onclick="selectChoice(this, 'authenticated')">
+                                            <input type="radio" name="submission_type" value="authenticated" checked>
+                                            <div style="font-weight: 600; font-size: 13px; margin-bottom: 2px;">Mit meinem Konto</div>
+                                            <div style="font-size: 12px; color: var(--text-muted);">Angemeldet als {{ auth()->user()->name }}</div>
+                                        </label>
+                                        <label class="choice-card" style="flex: 1;" onclick="selectChoice(this, 'anonymous')">
+                                            <input type="radio" name="submission_type" value="anonymous">
+                                            <div style="font-weight: 600; font-size: 13px; margin-bottom: 2px;">Anonym</div>
+                                            <div style="font-size: 12px; color: var(--text-muted);">Automatische Zugangsdaten</div>
+                                        </label>
+                                    </div>
                                 </div>
+                            @endif
+                        @endauth
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" onclick="nextStep()">Weiter</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="step-panel" data-step="2">
+                        <div class="form-group">
+                            <label class="form-label">Betroffene Gesellschaft <span class="optional">(optional)</span></label>
+                            <input class="form-control" type="text" name="company" placeholder="z.B. Beispiel GmbH">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Art des Verstosses <span class="optional">(optional)</span></label>
+                            <select class="form-control" name="violation_type">
+                                <option value="">Bitte wahlen...</option>
+                                <option value="Korruption">Korruption</option>
+                                <option value="Betrug">Betrug</option>
+                                <option value="Datenschutzverstoß">Datenschutzverstoß</option>
+                                <option value="Diskriminierung">Diskriminierung</option>
+                                <option value="Umweltverstoß">Umweltverstoß</option>
+                                <option value="Sicherheitsrisiko">Sicherheitsrisiko</option>
+                                <option value="Sonstiges">Sonstiges</option>
+                            </select>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div class="form-group">
+                                <label class="form-label">Datum des Vorfalls <span class="optional">(optional)</span></label>
+                                <input class="form-control" type="date" name="incident_date">
                             </div>
-                        @endif
-                    @endauth
-
-                    <div class="button-group">
-                        <button type="button" class="btn-primary" onclick="nextStep()">Weiter →</button>
-                    </div>
-                </div>
-
-                <!-- Step 2: Report Details -->
-                <div class="step" data-step="2">
-                    <h2 style="margin-bottom: 20px;">Bericht erstellen</h2>
-                    
-                    <div class="form-group">
-                        <label>Welche Gesellschaft ist involviert? <span class="optional">(optional)</span></label>
-                        <input type="text" name="company" placeholder="z.B. Beispiel GmbH">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Was ist der Auflegung? <span class="optional">(optional)</span></label>
-                        <select name="violation_type">
-                            <option value="">Bitte wählen...</option>
-                            <option value="Korruption">Korruption</option>
-                            <option value="Betrug">Betrug</option>
-                            <option value="Datenschutzverstoß">Datenschutzverstoß</option>
-                            <option value="Diskriminierung">Diskriminierung</option>
-                            <option value="Umweltverstoß">Umweltverstoß</option>
-                            <option value="Sicherheitsrisiko">Sicherheitsrisiko</option>
-                            <option value="Sonstiges">Sonstiges</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Wann ist es passiert? <span class="optional">(optional)</span></label>
-                        <input type="date" name="incident_date">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Wo ist es passiert? <span class="optional">(optional)</span></label>
-                        <input type="text" name="incident_location" placeholder="z.B. Hauptsitz Berlin, Abteilung XY">
-                    </div>
-
-                    <div class="button-group">
-                        <button type="button" class="btn-secondary" onclick="prevStep()">← Zurück</button>
-                        <button type="button" class="btn-primary" onclick="nextStep()">Weiter →</button>
-                    </div>
-                </div>
-
-                <!-- Step 3: Details -->
-                <div class="step" data-step="3">
-                    <h2 style="margin-bottom: 20px;">Einzelheiten zu Ihrem Bericht</h2>
-                    
-                    <div class="form-group">
-                        <label>Wer ist beteiligt oder betroffen? <span class="optional">(optional)</span></label>
-                        <textarea name="involved_persons" placeholder="Beschreiben Sie beteiligte oder betroffene Personen (ohne Ihre eigene Identität preiszugeben)"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Titel des Hinweises <span style="color: red;">*</span></label>
-                        <input type="text" name="title" required placeholder="Kurze Zusammenfassung">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Einzelheiten zu Ihrem Bericht <span style="color: red;">*</span></label>
-                        <textarea name="description" required placeholder="Beschreiben Sie den Vorfall so detailliert wie möglich..." style="min-height: 200px;"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Anhänge hochladen <span class="optional">(optional)</span></label>
-                        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt" style="padding: 10px; border: 2px dashed #e0e0e0;">
-                        <small style="color: #666; display: block; margin-top: 5px;">Max. 5 Dateien, je max. 10MB (PDF, DOC, JPG, PNG, TXT)</small>
-                        <div id="fileList" style="margin-top: 10px;"></div>
-                    </div>
-
-                    <div class="button-group">
-                        <button type="button" class="btn-secondary" onclick="prevStep()">← Zurück</button>
-                        <button type="button" class="btn-primary" onclick="nextStep()">Weiter →</button>
-                    </div>
-                </div>
-
-                <!-- Step 4: Review & Submit -->
-                <div class="step" data-step="4">
-                    <h2 style="margin-bottom: 20px;">Überprüfen und absenden</h2>
-                    
-                    <div class="alert alert-info">
-                        <strong>Bitte überprüfen Sie Ihre Angaben</strong><br>
-                        Nach dem Absenden erhalten Sie automatisch generierte Zugangsdaten.
-                    </div>
-
-                    <div id="reviewContent" style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                        <!-- Will be filled by JavaScript -->
-                    </div>
-
-                    <div class="button-group">
-                        <button type="button" class="btn-secondary" onclick="prevStep()">← Zurück</button>
-                        <button type="submit" class="btn-primary">Hinweis absenden</button>
-                    </div>
-                </div>
-
-                <!-- Success Message -->
-                <div class="step" data-step="5">
-                    <div class="alert alert-success">
-                        <strong>✅ Hinweis erfolgreich eingereicht!</strong><br>
-                        Ihre Meldung wurde sicher übermittelt.
-                    </div>
-
-                    <div class="credentials-box">
-                        <h3>⚠️ WICHTIG: Speichern Sie diese Zugangsdaten!</h3>
-                        <p style="margin-bottom: 15px;">Diese Daten werden nur einmal angezeigt und ermöglichen Ihnen den Zugriff auf Ihren Hinweis.</p>
-                        
-                        <div class="credential-item">
-                            <span><strong>Benutzername:</strong> <span id="cred-username"></span></span>
-                            <button type="button" class="copy-btn" onclick="copyText('cred-username')">Kopieren</button>
-                        </div>
-                        <div class="credential-item">
-                            <span><strong>Passwort:</strong> <span id="cred-password"></span></span>
-                            <button type="button" class="copy-btn" onclick="copyText('cred-password')">Kopieren</button>
-                        </div>
-                        <div class="credential-item">
-                            <span><strong>Zugangslink:</strong> <a href="#" id="cred-url" target="_blank">Link öffnen</a></span>
-                            <button type="button" class="copy-btn" onclick="copyText('cred-url')">Kopieren</button>
+                            <div class="form-group">
+                                <label class="form-label">Ort des Vorfalls <span class="optional">(optional)</span></label>
+                                <input class="form-control" type="text" name="incident_location" placeholder="z.B. Berlin, Abteilung XY">
+                            </div>
                         </div>
 
-                        <div class="warning-box">
-                            <strong>⚠️ Diese Zugangsdaten werden nicht erneut angezeigt!</strong><br>
-                            Bitte speichern Sie sie an einem sicheren Ort.
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-secondary" onclick="prevStep()">Zuruck</button>
+                            <button type="button" class="btn btn-primary" onclick="nextStep()">Weiter</button>
                         </div>
                     </div>
 
-                    <button type="button" class="btn-primary" onclick="window.location.href='/'">Fertig</button>
-                </div>
-            </form>
+                    <!-- Step 3 -->
+                    <div class="step-panel" data-step="3">
+                        <div class="form-group">
+                            <label class="form-label">Beteiligte Personen <span class="optional">(optional)</span></label>
+                            <textarea class="form-control" name="involved_persons" placeholder="Beschreiben Sie beteiligte oder betroffene Personen"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Titel des Hinweises <span style="color: var(--danger);">*</span></label>
+                            <input class="form-control" type="text" name="title" required placeholder="Kurze Zusammenfassung des Vorfalls">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Beschreibung <span style="color: var(--danger);">*</span></label>
+                            <textarea class="form-control" name="description" required placeholder="Beschreiben Sie den Vorfall so detailliert wie moglich..." style="min-height: 160px;"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Anhange <span class="optional">(optional)</span></label>
+                            <input class="form-control" type="file" id="fileInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt" style="padding: 6px;">
+                            <div class="text-sm text-muted mt-1">Max. 5 Dateien, je max. 10 MB (PDF, DOC, JPG, PNG, TXT)</div>
+                            <div id="fileList"></div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-secondary" onclick="prevStep()">Zuruck</button>
+                            <button type="button" class="btn btn-primary" onclick="nextStep()">Weiter</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Review -->
+                    <div class="step-panel" data-step="4">
+                        <div class="alert alert-info">Bitte uberprufen Sie Ihre Angaben vor dem Absenden.</div>
+
+                        <div class="review-block" id="reviewContent"></div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-secondary" onclick="prevStep()">Zuruck</button>
+                            <button type="submit" class="btn btn-primary">Hinweis absenden</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Success -->
+                    <div class="step-panel" data-step="5">
+                        <div class="alert alert-success" style="margin-bottom: 1.25rem;">
+                            <strong>Hinweis erfolgreich eingereicht.</strong><br>
+                            Ihre Meldung wurde sicher ubermittelt.
+                        </div>
+
+                        <div class="alert alert-warning">
+                            <strong>Wichtig: Speichern Sie diese Zugangsdaten.</strong><br>
+                            Sie werden nur einmal angezeigt und ermoglichen Ihnen den Zugriff auf Ihren Hinweis.
+                        </div>
+
+                        <table class="credentials-table">
+                            <tr>
+                                <td>Benutzername</td>
+                                <td>
+                                    <span id="cred-username"></span>
+                                    <button type="button" class="copy-btn" onclick="copyText('cred-username')">Kopieren</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Passwort</td>
+                                <td>
+                                    <span id="cred-password"></span>
+                                    <button type="button" class="copy-btn" onclick="copyText('cred-password')">Kopieren</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Zugangslink</td>
+                                <td>
+                                    <a href="#" id="cred-url" class="link" target="_blank">Link offnen</a>
+                                    <button type="button" class="copy-btn" onclick="copyText('cred-url')">Kopieren</button>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <button type="button" class="btn btn-primary" onclick="window.location.href='/'">Fertig</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -369,33 +355,35 @@
         let currentStep = 1;
         const totalSteps = 4;
 
-        function setSubmissionType(type) {
-            // Visual feedback for selection
-            document.querySelectorAll('label[onclick*="setSubmissionType"]').forEach(label => {
-                label.style.borderColor = '#e0e0e0';
-                label.style.background = 'white';
+        function selectChoice(el, type) {
+            document.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function updateIndicator(step) {
+            document.querySelectorAll('.step-item').forEach(item => {
+                const s = parseInt(item.dataset.step);
+                item.classList.remove('active', 'completed');
+                if (s === step) item.classList.add('active');
+                else if (s < step) item.classList.add('completed');
             });
-            event.currentTarget.style.borderColor = '#667eea';
-            event.currentTarget.style.background = '#f0f4ff';
         }
 
         function showStep(step) {
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.progress-step').forEach(s => s.classList.remove('active', 'completed'));
-            
-            document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
-            document.querySelector(`.progress-step[data-step="${step}"]`).classList.add('active');
-            
-            for(let i = 1; i < step; i++) {
-                document.querySelector(`.progress-step[data-step="${i}"]`).classList.add('completed');
-            }
+            document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+            const panel = document.querySelector(`.step-panel[data-step="${step}"]`);
+            if (panel) panel.classList.add('active');
+            if (step <= totalSteps) updateIndicator(step);
         }
 
         function nextStep() {
-            if(currentStep === 4) {
-                updateReview();
+            if (currentStep === 3) {
+                const title = document.querySelector('[name="title"]').value.trim();
+                const desc = document.querySelector('[name="description"]').value.trim();
+                if (!title || !desc) { alert('Bitte fullen Sie Titel und Beschreibung aus.'); return; }
             }
-            if(currentStep < totalSteps) {
+            if (currentStep === totalSteps) updateReview();
+            if (currentStep < totalSteps) {
                 currentStep++;
                 showStep(currentStep);
                 window.scrollTo(0, 0);
@@ -403,7 +391,7 @@
         }
 
         function prevStep() {
-            if(currentStep > 1) {
+            if (currentStep > 1) {
                 currentStep--;
                 showStep(currentStep);
                 window.scrollTo(0, 0);
@@ -411,52 +399,36 @@
         }
 
         function updateReview() {
-            const formData = new FormData(document.getElementById('reportForm'));
-            let html = '<h3 style="margin-bottom: 15px;">Ihre Angaben:</h3>';
-            
+            const fd = new FormData(document.getElementById('reportForm'));
             const fields = {
-                'title': 'Titel',
-                'company': 'Gesellschaft',
-                'violation_type': 'Art des Verstoßes',
-                'incident_date': 'Datum',
-                'incident_location': 'Ort',
-                'involved_persons': 'Beteiligte Personen',
-                'description': 'Beschreibung'
+                title: 'Titel', company: 'Gesellschaft', violation_type: 'Art des Verstosses',
+                incident_date: 'Datum', incident_location: 'Ort',
+                involved_persons: 'Beteiligte', description: 'Beschreibung'
             };
-
-            for(const [key, label] of Object.entries(fields)) {
-                const value = formData.get(key);
-                if(value) {
-                    html += `<p><strong>${label}:</strong> ${value}</p>`;
-                }
+            let html = '';
+            for (const [key, label] of Object.entries(fields)) {
+                const val = fd.get(key);
+                if (val) html += `<div class="review-row"><div class="review-key">${label}</div><div class="review-val">${val}</div></div>`;
             }
-
-            document.getElementById('reviewContent').innerHTML = html;
+            document.getElementById('reviewContent').innerHTML = html || '<div class="text-muted text-sm">Keine Angaben</div>';
         }
 
         document.getElementById('reportForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const formData = new FormData(this);
+            const fd = new FormData(this);
             const files = document.getElementById('fileInput').files;
-            
-            // Check if user is authenticated and wants to submit with their account
             const submissionType = document.querySelector('input[name="submission_type"]:checked');
             const isAnonymous = !submissionType || submissionType.value === 'anonymous';
-            
+
             const data = {
-                title: formData.get('title'),
-                company: formData.get('company'),
-                violation_type: formData.get('violation_type'),
-                incident_date: formData.get('incident_date'),
-                incident_location: formData.get('incident_location'),
-                involved_persons: formData.get('involved_persons'),
-                description: formData.get('description'),
-                is_anonymous: isAnonymous
+                title: fd.get('title'), company: fd.get('company'),
+                violation_type: fd.get('violation_type'), incident_date: fd.get('incident_date'),
+                incident_location: fd.get('incident_location'), involved_persons: fd.get('involved_persons'),
+                description: fd.get('description'), is_anonymous: isAnonymous
             };
 
             try {
-                const response = await fetch('/api/reports', {
+                const res = await fetch('/api/reports', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -465,77 +437,48 @@
                     },
                     body: JSON.stringify(data)
                 });
+                const result = await res.json();
 
-                const result = await response.json();
-
-                if(result.success) {
-                    // Upload files if any
-                    if (files.length > 0) {
-                        await uploadFiles(result.report_id || result.report.id, files);
-                    }
+                if (result.success) {
+                    if (files.length > 0) await uploadFiles(result.report_id || result.report.id, files);
 
                     if (isAnonymous) {
-                        // Show credentials for anonymous submission
                         document.getElementById('cred-username').textContent = result.credentials.username;
                         document.getElementById('cred-password').textContent = result.credentials.password;
                         document.getElementById('cred-url').textContent = result.credentials.access_url;
                         document.getElementById('cred-url').href = result.credentials.access_url;
-                        
                         currentStep = 5;
                         showStep(5);
                         window.scrollTo(0, 0);
                     } else {
-                        // Redirect to user dashboard for authenticated submission
                         window.location.href = '/user/dashboard';
                     }
                 }
-            } catch(error) {
+            } catch(err) {
                 alert('Fehler beim Absenden. Bitte versuchen Sie es erneut.');
             }
         });
 
         async function uploadFiles(reportId, files) {
-            const formData = new FormData();
-            for (let i = 0; i < files.length; i++) {
-                formData.append('files[]', files[i]);
-            }
-
+            const fd = new FormData();
+            for (let i = 0; i < files.length; i++) fd.append('files[]', files[i]);
             try {
-                await fetch(`/api/reports/${reportId}/attachments`, {
-                    method: 'POST',
-                    body: formData
-                });
-            } catch(error) {
-                console.error('Error uploading files:', error);
-            }
+                await fetch(`/api/reports/${reportId}/attachments`, { method: 'POST', body: fd });
+            } catch(e) { console.error(e); }
         }
 
-        // File input handler
         document.getElementById('fileInput').addEventListener('change', function(e) {
-            const fileList = document.getElementById('fileList');
-            const files = e.target.files;
-            
-            if (files.length === 0) {
-                fileList.innerHTML = '';
-                return;
-            }
-
-            let html = '<div style="background: #f9f9f9; padding: 10px; border-radius: 4px;">';
-            html += '<strong>Ausgewählte Dateien:</strong><ul style="margin: 10px 0; padding-left: 20px;">';
-            
-            for (let i = 0; i < files.length; i++) {
-                const size = (files[i].size / 1024).toFixed(2);
-                html += `<li>${files[i].name} (${size} KB)</li>`;
-            }
-            
-            html += '</ul></div>';
-            fileList.innerHTML = html;
+            const list = document.getElementById('fileList');
+            if (!e.target.files.length) { list.innerHTML = ''; return; }
+            let html = '<div style="margin-top: 8px; font-size: 12px; color: var(--text-muted);">';
+            for (const f of e.target.files) html += `<div>${f.name} (${(f.size/1024).toFixed(1)} KB)</div>`;
+            list.innerHTML = html + '</div>';
         });
 
-        function copyText(elementId) {
-            const text = document.getElementById(elementId).textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('In Zwischenablage kopiert!');
+        function copyText(id) {
+            const el = document.getElementById(id);
+            navigator.clipboard.writeText(el.textContent || el.href).then(() => {
+                alert('Kopiert!');
             });
         }
     </script>

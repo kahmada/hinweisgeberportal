@@ -4,23 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anmeldung - Hinweisgeberportal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/portal.css">
 </head>
-<body class="bg-gray-50">
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full space-y-8">
-            <div>
-                <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                    Anmeldung
-                </h2>
-                <p class="mt-2 text-center text-sm text-gray-600">
-                    Melden Sie sich an, um Ihre Hinweise zu verwalten
-                </p>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div style="margin-bottom: 1.5rem;">
+                <div style="font-size: 13px; font-weight: 700; color: #005FB8; letter-spacing: -0.3px; margin-bottom: 1rem;">Hinweisgeberportal</div>
+                <div class="auth-title">Anmeldung</div>
+                <div class="auth-subtitle">Melden Sie sich an, um Ihre Hinweise zu verwalten</div>
             </div>
 
             @if ($errors->any())
-                <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                    <ul class="list-disc list-inside">
+                <div class="alert alert-danger">
+                    <ul style="margin: 0; padding-left: 16px;">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -29,55 +26,38 @@
             @endif
 
             @if (session('success'))
-                <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-                    {{ session('success') }}
-                </div>
+                <div class="alert alert-success">{{ session('success') }}</div>
             @endif
 
-            <form class="mt-8 space-y-6" action="{{ route('user.login') }}" method="POST">
+            <form action="{{ route('user.login') }}" method="POST">
                 @csrf
-                <div class="rounded-md shadow-sm space-y-4">
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">E-Mail</label>
-                        <input id="email" name="email" type="email" required 
-                               value="{{ old('email') }}"
-                               class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm">
-                    </div>
-
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-gray-700">Passwort</label>
-                        <input id="password" name="password" type="password" required 
-                               class="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm">
-                    </div>
-
-                    <div class="flex items-center">
-                        <input id="remember" name="remember" type="checkbox" 
-                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                        <label for="remember" class="ml-2 block text-sm text-gray-900">
-                            Angemeldet bleiben
-                        </label>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">E-Mail-Adresse</label>
+                    <input class="form-control" type="email" id="email" name="email" value="{{ old('email') }}" required autofocus>
                 </div>
 
-                <div>
-                    <button type="submit" 
-                            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Anmelden
-                    </button>
+                <div class="form-group">
+                    <label class="form-label" for="password">Passwort</label>
+                    <input class="form-control" type="password" id="password" name="password" required>
                 </div>
 
-                <div class="text-center text-sm">
-                    <a href="{{ route('register') }}" class="font-medium text-blue-600 hover:text-blue-500">
-                        Noch kein Konto? Jetzt registrieren
-                    </a>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 1.25rem;">
+                    <input type="checkbox" id="remember" name="remember" style="width: auto;">
+                    <label for="remember" style="font-size: 13px; color: #374151; margin: 0; font-weight: 400;">Angemeldet bleiben</label>
                 </div>
 
-                <div class="text-center text-sm">
-                    <a href="/" class="font-medium text-gray-600 hover:text-gray-500">
-                        ← Zurück zur Startseite
-                    </a>
-                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    Anmelden
+                </button>
             </form>
+
+            <hr class="divider">
+            <div style="text-align: center; font-size: 13px; color: #6b7280;">
+                Noch kein Konto? <a href="{{ route('register') }}" class="link">Jetzt registrieren</a>
+            </div>
+            <div style="text-align: center; font-size: 13px; color: #6b7280; margin-top: 8px;">
+                <a href="/" class="link">Zuruck zur Startseite</a>
+            </div>
         </div>
     </div>
 </body>

@@ -5,248 +5,222 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Hinweis #{{ $report->id }} - Admin</title>
+    <link rel="stylesheet" href="/css/portal.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: #f5f5f5; }
-        .header { background: white; padding: 1rem 2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .header h1 { font-size: 1.5rem; color: #333; }
-        .back-btn { background: #6b7280; color: white; padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; }
-        .back-btn:hover { background: #4b5563; }
-        .container { max-width: 1200px; margin: 2rem auto; padding: 0 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-        .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .card h2 { margin-bottom: 1.5rem; color: #333; }
-        .info-row { display: flex; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
-        .info-label { font-weight: 600; color: #666; width: 180px; }
-        .info-value { color: #333; flex: 1; }
-        .status-select { padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 4px; font-size: 14px; }
-        .update-btn { background: #10b981; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
-        .update-btn:hover { background: #059669; }
-        .messages-container { max-height: 500px; overflow-y: auto; margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 8px; }
-        .message-item { margin: 15px 0; padding: 12px 15px; border-radius: 8px; max-width: 85%; }
-        .message-whistleblower { background: #e3f2fd; margin-right: auto; border-left: 4px solid #2196f3; }
-        .message-admin { background: #f3e5f5; margin-left: auto; border-left: 4px solid #9c27b0; }
-        .message-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: #666; }
-        .message-sender { font-weight: 600; }
-        .message-text { color: #333; line-height: 1.5; }
-        .message-form { display: flex; gap: 10px; margin-top: 15px; }
-        .message-form textarea { flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px; resize: vertical; min-height: 80px; }
-        .send-btn { background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; align-self: flex-end; }
-        .send-btn:hover { background: #2563eb; }
-        .full-width { grid-column: 1 / -1; }
-        .log-item { padding: 10px 0; border-bottom: 1px solid #f0f0f0; display: flex; gap: 15px; align-items: flex-start; }
-        .log-item:last-child { border-bottom: none; }
-        .log-icon { font-size: 18px; width: 30px; text-align: center; flex-shrink: 0; }
-        .log-meta { font-size: 12px; color: #999; margin-top: 3px; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .messages-box { height: 360px; overflow-y: auto; padding: 1rem; background: #f9fafb; border: 1px solid var(--border); border-radius: var(--radius); }
+        .log-row { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+        .log-row:last-child { border-bottom: none; }
+        .log-action { font-weight: 500; color: var(--text); }
+        .log-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>Hinweis #{{ $report->id }}</h1>
-        <a href="{{ route('admin.reports') }}" class="back-btn">← Zurück</a>
-    </div>
-    
+    <header class="page-header">
+        <span class="logo">Hinweisgeberportal</span>
+        <nav>
+            <a href="{{ route('admin.reports') }}" class="btn btn-secondary btn-sm">Zuruck zur Ubersicht</a>
+        </nav>
+    </header>
+
     <div class="container">
-        <!-- Report Details -->
-        <div class="card">
-            <h2>Hinweis-Details</h2>
-            
-            @if($report->is_anonymous)
-            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                <strong>🔒 Anonymer Hinweis</strong><br>
-                <small>Dieser Hinweis wurde anonym eingereicht. Keine persönlichen Daten des Hinweisgebers sind verfügbar.</small>
+        <div style="margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <h1 style="font-size: 18px; font-weight: 700;">Hinweis #{{ $report->id }}</h1>
+                <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Eingereicht am {{ $report->created_at->format('d.m.Y \u\m H:i') }} Uhr</div>
             </div>
-            @else
-                @if(!$report->isIdentityRevealed())
-                <div style="background: #e0e7ff; border-left: 4px solid #6366f1; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                    <strong>🔒 Identität geschützt</strong><br>
-                    <small>Dieser Hinweis wurde von einem registrierten Benutzer eingereicht. Die Identität ist standardmäßig geschützt.</small>
-                    <br><br>
-                    <button onclick="confirmRevealIdentity()" style="background: #dc2626; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
-                        🔓 Identität enthüllen
-                    </button>
-                </div>
+            @php
+                $badges = ['eingegangen'=>'badge-blue','in_pruefung'=>'badge-yellow','rueckfrage'=>'badge-orange','abgeschlossen'=>'badge-green'];
+                $labels = ['eingegangen'=>'Eingegangen','in_pruefung'=>'In Prufung','rueckfrage'=>'Ruckfrage','abgeschlossen'=>'Abgeschlossen'];
+            @endphp
+            <span class="badge {{ $badges[$report->status] ?? 'badge-gray' }}" style="font-size: 13px; padding: 4px 12px;">
+                {{ $labels[$report->status] ?? $report->status }}
+            </span>
+        </div>
+
+        <div class="two-col">
+            <!-- Left: Report Details -->
+            <div>
+                <!-- Identity Banner -->
+                @if($report->is_anonymous)
+                    <div class="alert alert-info" style="margin-bottom: 1rem;">
+                        Dieser Hinweis wurde anonym eingereicht. Keine personlichen Daten verfugbar.
+                    </div>
+                @elseif(!$report->isIdentityRevealed())
+                    <div class="alert alert-warning" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Identitat des Hinweisgebers ist geschutzt.</span>
+                        <button onclick="confirmRevealIdentity()" class="btn btn-danger btn-sm">Identitat enthullen</button>
+                    </div>
                 @else
-                <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                    <strong>⚠️ Identität enthüllt</strong><br>
-                    <div id="identity-info">
-                        <p style="margin-top: 10px;"><strong>Name:</strong> {{ $report->user?->name ?? 'Unbekannt' }}</p>
-                        <p><strong>E-Mail:</strong> {{ $report->user?->email ?? 'Unbekannt' }}</p>
-                        <p style="margin-top: 10px; font-size: 12px; color: #666;">
-                            Enthüllt am {{ $report->identity_revealed_at->format('d.m.Y H:i') }} Uhr 
-                            von {{ $report->revealedBy?->name ?? 'Unbekannt' }}
-                        </p>
+                    <div class="alert alert-danger" style="margin-bottom: 1rem;">
+                        <strong>Identitat enthullt</strong><br>
+                        Name: {{ $report->user?->name ?? '-' }}<br>
+                        E-Mail: {{ $report->user?->email ?? '-' }}<br>
+                        <span style="font-size: 12px; color: var(--text-muted);">
+                            Enthullt am {{ $report->identity_revealed_at->format('d.m.Y H:i') }} von {{ $report->revealedBy?->name ?? '-' }}
+                        </span>
+                    </div>
+                @endif
+
+                <!-- Status Update -->
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header">Status andern</div>
+                    <div class="card-body" style="display: flex; gap: 10px; align-items: center;">
+                        <select id="statusSelect" class="form-control" style="flex: 1;">
+                            <option value="eingegangen" {{ $report->status === 'eingegangen' ? 'selected' : '' }}>Eingegangen</option>
+                            <option value="in_pruefung" {{ $report->status === 'in_pruefung' ? 'selected' : '' }}>In Prufung</option>
+                            <option value="rueckfrage" {{ $report->status === 'rueckfrage' ? 'selected' : '' }}>Ruckfrage</option>
+                            <option value="abgeschlossen" {{ $report->status === 'abgeschlossen' ? 'selected' : '' }}>Abgeschlossen</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" onclick="updateStatus()">Speichern</button>
+                    </div>
+                </div>
+
+                <!-- Report Info -->
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header">Hinweis-Details</div>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <div class="info-label">Titel</div>
+                            <div class="info-value" style="font-weight: 500;">{{ $report->title }}</div>
+                        </div>
+                        @if($report->company)
+                        <div class="info-row">
+                            <div class="info-label">Gesellschaft</div>
+                            <div class="info-value">{{ $report->company }}</div>
+                        </div>
+                        @endif
+                        @if($report->violation_type)
+                        <div class="info-row">
+                            <div class="info-label">Art des Verstosses</div>
+                            <div class="info-value">{{ $report->violation_type }}</div>
+                        </div>
+                        @endif
+                        @if($report->incident_date)
+                        <div class="info-row">
+                            <div class="info-label">Datum</div>
+                            <div class="info-value">{{ \Carbon\Carbon::parse($report->incident_date)->format('d.m.Y') }}</div>
+                        </div>
+                        @endif
+                        @if($report->incident_location)
+                        <div class="info-row">
+                            <div class="info-label">Ort</div>
+                            <div class="info-value">{{ $report->incident_location }}</div>
+                        </div>
+                        @endif
+                        @if($report->involved_persons)
+                        <div class="info-row">
+                            <div class="info-label">Beteiligte</div>
+                            <div class="info-value">{{ $report->involved_persons }}</div>
+                        </div>
+                        @endif
+                        <div class="info-row">
+                            <div class="info-label">Beschreibung</div>
+                            <div class="info-value" style="white-space: pre-wrap; line-height: 1.6;">{{ $report->description }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attachments -->
+                @if($report->attachments->count() > 0)
+                <div class="card">
+                    <div class="card-header">Anhange ({{ $report->attachments->count() }})</div>
+                    <div class="card-body" style="padding: 0.75rem 1.5rem;">
+                        @foreach($report->attachments as $att)
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f3f4f6;">
+                            <span style="font-size: 13px;">{{ $att->original_filename }} <span class="text-muted">({{ $att->file_size_formatted }})</span></span>
+                            <a href="{{ route('attachments.download', $att->id) }}" class="btn btn-secondary btn-sm">Download</a>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
                 @endif
-            @endif
-            
-            <div class="info-row">
-                <div class="info-label">Status:</div>
-                <div class="info-value">
-                    <select id="statusSelect" class="status-select">
-                        <option value="eingegangen" {{ $report->status === 'eingegangen' ? 'selected' : '' }}>Eingegangen</option>
-                        <option value="in_pruefung" {{ $report->status === 'in_pruefung' ? 'selected' : '' }}>In Prüfung</option>
-                        <option value="rueckfrage" {{ $report->status === 'rueckfrage' ? 'selected' : '' }}>Rückfrage</option>
-                        <option value="abgeschlossen" {{ $report->status === 'abgeschlossen' ? 'selected' : '' }}>Abgeschlossen</option>
-                    </select>
-                    <button class="update-btn" onclick="updateStatus()">Status aktualisieren</button>
-                </div>
             </div>
 
-            <div class="info-row">
-                <div class="info-label">Eingereicht am:</div>
-                <div class="info-value">{{ $report->created_at->format('d.m.Y H:i') }} Uhr</div>
-            </div>
-
-            <div class="info-row">
-                <div class="info-label">Titel:</div>
-                <div class="info-value"><strong>{{ $report->title }}</strong></div>
-            </div>
-
-            @if($report->company)
-            <div class="info-row">
-                <div class="info-label">Gesellschaft:</div>
-                <div class="info-value">{{ $report->company }}</div>
-            </div>
-            @endif
-
-            @if($report->violation_type)
-            <div class="info-row">
-                <div class="info-label">Verstoß:</div>
-                <div class="info-value">{{ $report->violation_type }}</div>
-            </div>
-            @endif
-
-            @if($report->incident_date)
-            <div class="info-row">
-                <div class="info-label">Datum:</div>
-                <div class="info-value">{{ \Carbon\Carbon::parse($report->incident_date)->format('d.m.Y') }}</div>
-            </div>
-            @endif
-
-            @if($report->incident_location)
-            <div class="info-row">
-                <div class="info-label">Ort:</div>
-                <div class="info-value">{{ $report->incident_location }}</div>
-            </div>
-            @endif
-
-            @if($report->involved_persons)
-            <div class="info-row">
-                <div class="info-label">Beteiligte:</div>
-                <div class="info-value">{{ $report->involved_persons }}</div>
-            </div>
-            @endif
-
-            <div class="info-row">
-                <div class="info-label">Beschreibung:</div>
-                <div class="info-value" style="white-space: pre-wrap;">{{ $report->description }}</div>
-            </div>
-
-            @if($report->attachments->count() > 0)
-            <div class="info-row">
-                <div class="info-label">Anhänge:</div>
-                <div class="info-value">
-                    @foreach($report->attachments as $attachment)
-                        <div style="background: #f9f9f9; padding: 10px; margin: 5px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
-                            <span>📎 {{ $attachment->original_filename }} ({{ $attachment->file_size_formatted }})</span>
-                            <a href="{{ route('attachments.download', $attachment->id) }}" style="background: #3b82f6; color: white; padding: 5px 15px; border-radius: 4px; text-decoration: none; font-size: 13px;">Download</a>
+            <!-- Right: Communication -->
+            <div>
+                <div class="card" style="margin-bottom: 1rem;">
+                    <div class="card-header">Kommunikation</div>
+                    <div class="card-body" style="padding: 1rem;">
+                        <div id="messages-container" class="messages-box">
+                            <div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 0;">Nachrichten werden geladen...</div>
                         </div>
-                    @endforeach
+                        <div style="display: flex; gap: 8px; margin-top: 10px;">
+                            <textarea id="messageInput" class="form-control" placeholder="Nachricht an Hinweisgeber..." style="min-height: 70px; flex: 1;"></textarea>
+                        </div>
+                        <div style="margin-top: 8px; text-align: right;">
+                            <button class="btn btn-primary btn-sm" onclick="sendMessage()">Senden</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Log -->
+                <div class="card">
+                    <div class="card-header">Aktivitatsprotokoll</div>
+                    <div class="card-body" style="padding: 0.75rem 1.5rem; max-height: 300px; overflow-y: auto;">
+                        @forelse($activityLogs as $log)
+                        <div class="log-row">
+                            <div style="flex: 1;">
+                                <div class="log-action">
+                                    {{ $log->action_label }}
+                                    @if($log->old_value && $log->new_value)
+                                        <span class="badge badge-gray" style="margin-left: 4px;">{{ $log->old_value }}</span>
+                                        <span style="color: var(--text-muted); margin: 0 2px;">→</span>
+                                        <span class="badge badge-blue">{{ $log->new_value }}</span>
+                                    @endif
+                                </div>
+                                <div class="log-meta">
+                                    {{ $log->user?->name ?? 'System' }} &bull; {{ $log->created_at->format('d.m.Y H:i') }}
+                                </div>
+                            </div>
+                        </div>
+                        @empty
+                        <div style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 1rem 0;">Keine Aktivitaten</div>
+                        @endforelse
+                    </div>
                 </div>
             </div>
-            @endif
-        </div>
-
-        <!-- Communication -->
-        <div class="card">
-            <h2>💬 Kommunikation</h2>            
-            <div id="messages-container" class="messages-container">
-                <p style="text-align: center; color: #999;">Nachrichten werden geladen...</p>
-            </div>
-
-            <form id="messageForm" class="message-form">
-                @csrf
-                <textarea 
-                    id="messageInput" 
-                    name="message" 
-                    placeholder="Nachricht an Whistleblower..." 
-                    required
-                ></textarea>
-                <button type="submit" class="send-btn">Senden</button>
-            </form>
         </div>
     </div>
 
     <script>
         const reportId = {{ $report->id }};
 
-        // Load messages
         async function loadMessages() {
             try {
-                const response = await fetch(`/api/reports/${reportId}/messages`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
+                const res = await fetch(`/api/reports/${reportId}/messages`, {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                     credentials: 'same-origin'
                 });
-                const data = await response.json();
-                
-                if (data.success) {
-                    displayMessages(data.messages);
-                    markMessagesAsRead();
-                }
-            } catch (error) {
-                console.error('Error loading messages:', error);
-            }
+                const data = await res.json();
+                if (data.success) { renderMessages(data.messages); markRead(); }
+            } catch(e) {}
         }
 
-        // Display messages
-        function displayMessages(messages) {
-            const container = document.getElementById('messages-container');
-            
-            if (messages.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999;">Noch keine Nachrichten</p>';
+        function renderMessages(messages) {
+            const box = document.getElementById('messages-container');
+            if (!messages.length) {
+                box.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:2rem 0;">Noch keine Nachrichten</div>';
                 return;
             }
-
-            container.innerHTML = messages.map(msg => {
-                const isAdmin = msg.sender_type === 'admin';
-                const date = new Date(msg.created_at);
-                const formattedDate = date.toLocaleString('de-DE', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-
-                return `
-                    <div class="message-item message-${msg.sender_type}">
-                        <div class="message-header">
-                            <span class="message-sender">${isAdmin ? 'Administrator' : 'Whistleblower'}</span>
-                            <span class="message-time">${formattedDate}</span>
-                        </div>
-                        <div class="message-text">${escapeHtml(msg.message)}</div>
-                    </div>
-                `;
+            box.innerHTML = messages.map(m => {
+                const isAdmin = m.sender_type === 'admin';
+                const dt = new Date(m.created_at).toLocaleString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+                return `<div class="message-bubble ${isAdmin ? 'from-admin' : 'from-user'}">
+                    <div class="message-meta">${isAdmin ? 'Administrator' : 'Hinweisgeber'} &bull; ${dt}</div>
+                    <div>${escHtml(m.message)}</div>
+                </div>`;
             }).join('');
-
-            container.scrollTop = container.scrollHeight;
+            box.scrollTop = box.scrollHeight;
         }
 
-        // Send message
-        document.getElementById('messageForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const messageInput = document.getElementById('messageInput');
-            const message = messageInput.value.trim();
-            
-            if (!message) return;
-
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const msg = input.value.trim();
+            if (!msg) return;
             try {
-                const response = await fetch(`/api/reports/${reportId}/messages`, {
+                const res = await fetch(`/api/reports/${reportId}/messages`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -255,46 +229,27 @@
                         'X-Requested-With': 'XMLHttpRequest'
                     },
                     credentials: 'same-origin',
-                    body: JSON.stringify({ message })
+                    body: JSON.stringify({ message: msg })
                 });
+                const data = await res.json();
+                if (data.success) { input.value = ''; loadMessages(); }
+            } catch(e) {}
+        }
 
-                const data = await response.json();
-
-                if (data.success) {
-                    messageInput.value = '';
-                    loadMessages();
-                } else {
-                    alert('Fehler beim Senden');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Fehler beim Senden');
-            }
-        });
-
-        // Mark messages as read
-        async function markMessagesAsRead() {
+        async function markRead() {
             try {
                 await fetch(`/api/reports/${reportId}/messages/mark-read`, {
                     method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
+                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
                     credentials: 'same-origin'
                 });
-            } catch (error) {
-                console.error('Error:', error);
-            }
+            } catch(e) {}
         }
 
-        // Update status
         async function updateStatus() {
             const status = document.getElementById('statusSelect').value;
-            
             try {
-                const response = await fetch(`/api/reports/${reportId}`, {
+                const res = await fetch(`/api/reports/${reportId}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -305,43 +260,15 @@
                     credentials: 'same-origin',
                     body: JSON.stringify({ status })
                 });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    alert('Status aktualisiert!');
-                } else {
-                    alert('Fehler beim Aktualisieren');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Fehler beim Aktualisieren');
-            }
+                const data = await res.json();
+                if (data.success) location.reload();
+            } catch(e) {}
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Reveal identity with confirmation
         async function confirmRevealIdentity() {
-            const confirmed = confirm(
-                '⚠️ WARNUNG: Identität enthüllen\n\n' +
-                'Sie sind dabei, die Identität des Hinweisgebers zu enthüllen.\n\n' +
-                '• Diese Aktion wird protokolliert\n' +
-                '• Sie kann nicht rückgängig gemacht werden\n' +
-                '• Der Hinweisgeber wird NICHT benachrichtigt\n\n' +
-                'Möchten Sie fortfahren?'
-            );
-
-            if (!confirmed) {
-                return;
-            }
-
+            if (!confirm('Identitat enthullen?\n\nDiese Aktion wird protokolliert und kann nicht ruckgangig gemacht werden.')) return;
             try {
-                const response = await fetch(`/api/reports/${reportId}/reveal-identity`, {
+                const res = await fetch(`/api/reports/${reportId}/reveal-identity`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -351,62 +278,20 @@
                     },
                     credentials: 'same-origin'
                 });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    alert('✅ Identität wurde erfolgreich enthüllt');
-                    location.reload(); // Reload to show the revealed identity
-                } else {
-                    alert('❌ Fehler: ' + (data.message || 'Identität konnte nicht enthüllt werden'));
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('❌ Fehler beim Enthüllen der Identität');
-            }
+                const data = await res.json();
+                if (data.success) location.reload();
+                else alert(data.message || 'Fehler');
+            } catch(e) {}
         }
 
-        // Load messages on page load
-        loadMessages();
+        function escHtml(t) {
+            const d = document.createElement('div');
+            d.textContent = t;
+            return d.innerHTML;
+        }
 
-        // Auto-refresh every 10 seconds
+        loadMessages();
         setInterval(loadMessages, 10000);
     </script>
-
-    {{-- Activity Log --}}
-    <div style="max-width: 1200px; margin: 0 auto 2rem; padding: 0 2rem;">
-        <div class="card full-width">
-            <h2>📋 Aktivitätsprotokoll</h2>
-            @forelse($activityLogs as $log)
-                <div class="log-item">
-                    <div class="log-icon">
-                        @switch($log->action)
-                            @case('status_changed') 🔄 @break
-                            @case('identity_revealed') 🔓 @break
-                            @case('report_accessed') 👁️ @break
-                            @case('message_sent') 💬 @break
-                            @default ⚙️
-                        @endswitch
-                    </div>
-                    <div>
-                        <div>
-                            <strong>{{ $log->action_label }}</strong>
-                            @if($log->old_value && $log->new_value)
-                                <span style="color: #999;">→</span>
-                                <span style="background: #fef3c7; padding: 2px 8px; border-radius: 4px; font-size: 12px;">{{ $log->old_value }}</span>
-                                <span style="color: #999;">→</span>
-                                <span style="background: #d1fae5; padding: 2px 8px; border-radius: 4px; font-size: 12px;">{{ $log->new_value }}</span>
-                            @endif
-                        </div>
-                        <div class="log-meta">
-                            {{ $log->user?->name ?? 'System' }} &bull; {{ $log->created_at->format('d.m.Y H:i') }} Uhr &bull; IP: {{ $log->ip_address ?? '-' }}
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <p style="color: #999; text-align: center; padding: 20px;">Noch keine Aktivitäten protokolliert.</p>
-            @endforelse
-        </div>
-    </div>
 </body>
 </html>
