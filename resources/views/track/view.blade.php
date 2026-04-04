@@ -12,12 +12,13 @@
 </head>
 <body>
     <header class="page-header">
-        <span class="logo">Hinweisgeberportal</span>
+        <span class="logo">{{ __('messages.common.portal_name') }}</span>
         <nav>
             <span style="font-size: 13px; color: var(--text-muted); margin-right: 8px;">{{ session('whistleblower_username') }}</span>
-            <form method="POST" action="{{ route('report.logout') }}" style="display: inline;">
+            @include('partials.lang-switcher')
+            <form method="POST" action="{{ route('report.logout') }}" style="display: inline; margin-left: 8px;">
                 @csrf
-                <button type="submit" class="btn btn-secondary btn-sm">Abmelden</button>
+                <button type="submit" class="btn btn-secondary btn-sm">{{ __('messages.common.logout') }}</button>
             </form>
         </nav>
     </header>

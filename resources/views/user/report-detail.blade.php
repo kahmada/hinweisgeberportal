@@ -12,12 +12,13 @@
 </head>
 <body>
     <header class="page-header">
-        <span class="logo">Hinweisgeberportal</span>
+        <span class="logo">{{ __('messages.common.portal_name') }}</span>
         <nav>
-            <a href="{{ route('user.dashboard') }}" class="btn btn-secondary btn-sm">Zuruck</a>
+            @include('partials.lang-switcher')
+            <a href="{{ route('user.dashboard') }}" class="btn btn-secondary btn-sm" style="margin-left: 8px;">{{ __('messages.common.back') }}</a>
             <form action="{{ route('user.logout') }}" method="POST" style="display: inline; margin-left: 8px;">
                 @csrf
-                <button type="submit" class="btn btn-secondary btn-sm">Abmelden</button>
+                <button type="submit" class="btn btn-secondary btn-sm">{{ __('messages.common.logout') }}</button>
             </form>
         </nav>
     </header>

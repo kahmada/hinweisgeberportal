@@ -7,6 +7,14 @@ Route::get('/', function () {
     return view('report_form');
 });
 
+// Language switcher
+Route::get('/language/{locale}', function (string $locale) {
+    if (in_array($locale, ['de', 'en'])) {
+        session(['locale' => $locale]);
+    }
+    return redirect()->back();
+})->name('language.switch');
+
 Route::get('/login', function () {
     return view('login');
 })->name('login.form')->middleware('guest');

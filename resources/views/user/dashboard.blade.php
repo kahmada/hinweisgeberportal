@@ -8,12 +8,13 @@
 </head>
 <body>
     <header class="page-header">
-        <span class="logo">Hinweisgeberportal</span>
+        <span class="logo">{{ __('messages.common.portal_name') }}</span>
         <nav>
             <span style="font-size: 13px; color: var(--text-muted); margin-right: 8px;">{{ auth()->user()->name }}</span>
-            <form action="{{ route('user.logout') }}" method="POST" style="display: inline;">
+            @include('partials.lang-switcher')
+            <form action="{{ route('user.logout') }}" method="POST" style="display: inline; margin-left: 8px;">
                 @csrf
-                <button type="submit" class="btn btn-secondary btn-sm">Abmelden</button>
+                <button type="submit" class="btn btn-secondary btn-sm">{{ __('messages.common.logout') }}</button>
             </form>
         </nav>
     </header>
@@ -21,10 +22,10 @@
     <div class="container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <div>
-                <h1 style="font-size: 20px; font-weight: 700;">Meine Hinweise</h1>
-                <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Ubersicht Ihrer eingereichten Meldungen</div>
+                <h1 style="font-size: 20px; font-weight: 700;">{{ __('messages.user.my_reports') }}</h1>
+                <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">{{ __('messages.user.my_reports_sub') }}</div>
             </div>
-            <a href="/" class="btn btn-primary btn-sm">Neuen Hinweis einreichen</a>
+            <a href="/" class="btn btn-primary btn-sm">{{ __('messages.common.new_report') }}</a>
         </div>
 
         @if (session('success'))
@@ -34,8 +35,8 @@
         @if ($reports->isEmpty())
             <div class="card">
                 <div class="card-body" style="text-align: center; padding: 3rem;">
-                    <div style="font-size: 15px; color: var(--text-muted); margin-bottom: 1rem;">Sie haben noch keine Hinweise eingereicht.</div>
-                    <a href="/" class="btn btn-primary">Ersten Hinweis einreichen</a>
+                    <div style="font-size: 15px; color: var(--text-muted); margin-bottom: 1rem;">{{ __('messages.user.no_reports') }}</div>
+                    <a href="/" class="btn btn-primary">{{ __('messages.user.first_report') }}</a>
                 </div>
             </div>
         @else

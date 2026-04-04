@@ -18,9 +18,10 @@
 </head>
 <body>
     <header class="page-header">
-        <span class="logo">Hinweisgeberportal</span>
+        <span class="logo">{{ __('messages.common.portal_name') }}</span>
         <nav>
-            <a href="{{ route('admin.reports') }}" class="btn btn-secondary btn-sm">Zuruck zur Ubersicht</a>
+            @include('partials.lang-switcher')
+            <a href="{{ route('admin.reports') }}" class="btn btn-secondary btn-sm" style="margin-left: 8px;">{{ __('messages.admin.back_overview') }}</a>
         </nav>
     </header>
 

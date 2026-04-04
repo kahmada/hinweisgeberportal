@@ -149,17 +149,18 @@
 </head>
 <body>
     <header class="site-header">
-        <a href="/" style="font-size: 15px; font-weight: 700; color: #005FB8; text-decoration: none;">Hinweisgeberportal</a>
+        <a href="/" style="font-size: 15px; font-weight: 700; color: #005FB8; text-decoration: none;">{{ __('messages.common.portal_name') }}</a>
         <nav style="display: flex; gap: 8px; align-items: center;">
+            @include('partials.lang-switcher')
             @auth
                 @if(auth()->user()->is_admin)
                     <a href="{{ route('admin.reports') }}" class="btn btn-secondary btn-sm">Admin-Bereich</a>
                 @else
-                    <a href="{{ route('user.dashboard') }}" class="btn btn-secondary btn-sm">Meine Hinweise</a>
+                    <a href="{{ route('user.dashboard') }}" class="btn btn-secondary btn-sm">{{ __('messages.user.my_reports') }}</a>
                 @endif
             @else
-                <a href="{{ route('user.login') }}" class="btn btn-secondary btn-sm">Anmelden</a>
-                <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Registrieren</a>
+                <a href="{{ route('user.login') }}" class="btn btn-secondary btn-sm">{{ __('messages.common.login') }}</a>
+                <a href="{{ route('register') }}" class="btn btn-primary btn-sm">{{ __('messages.common.register') }}</a>
             @endauth
         </nav>
     </header>
