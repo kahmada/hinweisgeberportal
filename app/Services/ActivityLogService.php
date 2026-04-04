@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\ActivityLog;
-use Illuminate\Http\Request;
 
 class ActivityLogService
 {
@@ -14,13 +13,16 @@ class ActivityLogService
         ?string $newValue = null,
         ?string $ipAddress = null
     ): void {
+        // Anonymize IP for anonymous whistleblower actions (no authenticated user + session-based access)
+        $isAnonymousWhistleblower = !auth()->check() && session()->has('whistleblower_report_id');
+
         ActivityLog::create([
             'report_id'  => $reportId,
             'user_id'    => auth()->id(),
             'action'     => $action,
             'old_value'  => $oldValue,
             'new_value'  => $newValue,
-            'ip_address' => $ipAddress ?? request()->ip(),
+            'ip_address' => $isAnonymousWhistleblower ? null : ($ipAddress ?? request()->ip()),
         ]);
     }
 }
