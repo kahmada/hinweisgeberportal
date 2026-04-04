@@ -78,9 +78,9 @@ return [
     |
     */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    'locale' => env('APP_LOCALE', 'de'),
 
-    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'de'),
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
@@ -122,5 +122,10 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
+
+    'notify_admin_email' => env('NOTIFY_ADMIN_EMAIL'),
+
+    'locale' => env('APP_LOCALE', 'de'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'de'),
 
 ];

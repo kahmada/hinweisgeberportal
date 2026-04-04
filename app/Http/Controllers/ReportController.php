@@ -7,8 +7,10 @@ use App\Services\AnonymousCredentialsService;
 use App\Services\ActivityLogService;
 use App\Http\Requests\StoreReportRequest;
 use App\Http\Requests\UpdateReportRequest;
+use App\Mail\NewReportNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class ReportController extends Controller
 {
@@ -33,7 +35,6 @@ class ReportController extends Controller
         $isAnonymous = $request->boolean('is_anonymous', true);
 
         if ($isAnonymous) {
-            // Generate anonymous credentials
             $credentials = $this->credentialsService->generate();
 
             $report = Report::create([
@@ -51,7 +52,8 @@ class ReportController extends Controller
                 'status' => 'eingegangen',
             ]);
 
-            // Return credentials (ONLY SHOWN ONCE!)
+            $this->notifyAdminNewReport($report);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Hinweis erfolgreich eingereicht',
@@ -80,11 +82,25 @@ class ReportController extends Controller
             'status' => 'eingegangen',
         ]);
 
+        $this->notifyAdminNewReport($report);
+
         return response()->json([
             'success' => true,
             'message' => 'Hinweis erfolgreich eingereicht',
             'report' => $report,
         ], 201);
+    }
+
+    private function notifyAdminNewReport(Report $report): void
+    {
+        $email = config('app.notify_admin_email');
+        if (!$email) return;
+
+        try {
+            Mail::to($email)->queue(new NewReportNotification($report));
+        } catch (\Exception $e) {
+            // Don't fail the request if mail fails
+        }
     }
 
     public function update(UpdateReportRequest $request, Report $report)

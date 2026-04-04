@@ -6,7 +6,9 @@ use App\Models\Message;
 use App\Models\Report;
 use App\Services\ActivityLogService;
 use App\Http\Requests\StoreMessageRequest;
+use App\Mail\NewMessageNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class MessageController extends Controller
 {
@@ -74,6 +76,17 @@ class MessageController extends Controller
                 'message' => $validated['message'],
                 'is_read' => false,
             ]);
+
+            // Notify admin
+            $email = config('app.notify_admin_email');
+            if ($email) {
+                try {
+                    $preview = mb_substr($validated['message'], 0, 50);
+                    Mail::to($email)->queue(new NewMessageNotification($report, $preview));
+                } catch (\Exception $e) {
+                    // Don't fail the request if mail fails
+                }
+            }
         } else {
             abort(403, 'Zugriff verweigert');
         }
