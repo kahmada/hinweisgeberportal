@@ -6,10 +6,15 @@ services:
     container_name: app
     restart: unless-stopped
     working_dir: /var/www
+    env_file:
+      - .env
     volumes:
       - .:/var/www
     networks:
       - app_network
+    depends_on:
+      db:
+        condition: service_healthy
 
   nginx:
     image: nginx:alpine
@@ -30,16 +35,21 @@ services:
     container_name: database
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel_app}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_USER: ${DB_USERNAME:-laravel}
     ports:
       - "3306:3306"
     volumes:
       - dbdata:/var/lib/mysql
     networks:
       - app_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root_secret}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 networks:
   app_network:
