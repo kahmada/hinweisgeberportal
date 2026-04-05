@@ -1,4 +1,4 @@
-# 🛡️ Ephilos — Whistleblower Portal (HinSchG Compliant)
+# 🛡️ Whistleblower Portal (HinSchG Compliant)
 
 A secure and production-ready SaaS application designed to comply with the German Hinweisgeberschutzgesetz (HinSchG) and the EU Whistleblower Directive.
 
