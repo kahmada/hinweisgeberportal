@@ -1,152 +1,193 @@
-# 🛡️ Whistleblower Portal (HinSchG Compliant)
+# 🛡️ Ephilos — Whistleblower Portal (HinSchG Compliant)
 
-A highly secure, production-ready SaaS application designed to comply with the German Whistleblower Protection Act (HinSchG) and the EU Whistleblower Directive. It provides a secure, anonymous channel for employees and stakeholders to report misconduct, while offering organizations a comprehensive management dashboard to process cases.
+A secure and production-ready SaaS application designed to comply with the German Hinweisgeberschutzgesetz (HinSchG) and the EU Whistleblower Directive.
 
----
+The platform enables anonymous and secure reporting of misconduct, while providing organizations with powerful tools to manage, investigate, and respond to reports — without compromising the identity of the whistleblower.
 
 ## 🎯 Project Overview
 
-This platform facilitates bidirectional, anonymous communication between whistleblowers and internal compliance officers. Engineered focusing on strict data privacy, it ensures that reporters can track their case status and exchange messages without ever revealing their identity, utilizing automated cryptographic token generation and strict access control policies.
+This project implements a complete whistleblower system with:
+
+- Anonymous and registered reporting flows
+- Secure tracking via token-based access
+- Two-way communication between whistleblower and admin
+- Full audit logging and strict access control
+- Strong focus on data protection and security
+
+The system is designed to simulate a real-world SaaS compliance platform.
 
 ## ✨ Core Features
 
-### For Whistleblowers
-- **Anonymous Reporting**: Submit detailed reports without creating an account.
-- **Secure Tracking**: Auto-generated credentials (`WB-XXXXX` + unique passphrase) for returning users.
-- **Two-Way Communication**: Anonymous chat interface allowing follow-up questions from admins.
-- **File Attachments**: Support for evidential uploads (PDF, DOC, JPG, PNG) up to 10MB per file.
-- **Identity Protection**: Complete IP anonymization and zero-knowledge session handling.
-- **Registered Reporting**: Optional standard account creation for users who prefer non-anonymous reporting.
+### 🕵️ For Whistleblowers
+- Anonymous report submission (no account required)
+- Secure tracking via:
+  - `WB-XXXXXXXX` username
+  - One-time password
+  - Unique access URL (`/track/{token}`)
+- Two-way anonymous chat with administrators
+- File attachments (PDF, DOC, JPG, PNG, TXT — max 10MB)
+- Full identity protection (no IP logging, no personal data required)
 
-### For Administrators
-- **Case Management Dashboard**: Centralized view of all incoming reports, categorized by current status.
-- **Advanced Filtering**: Filter cases by status, submission type (Anonymous vs. Registered), and keywords.
-- **Audit Trails**: Immutable activity logs tracking status changes, message timestamps, and system events.
-- **Status Workflows**: Standard cases transitions (`Received` ➡️ `Under Review` ➡️ `Inquiry` ➡️ `Closed`).
-- **Identity Revelation Framework**: Strict protocols (logged permanently) for unmasking a registered user's identity if legally required.
+### 👤 For Registered Users
+- Account-based report submission
+- Personal dashboard to track reports
+- Chat and notification system
+- Identity hidden by default in admin view
 
-## 🛠️ Tech Stack
-
-**Backend Architecture**
-- **Framework**: Laravel 11.x (PHP 8.3)
-- **Database**: SQLite (Local) / MySQL 8.0 (Production via Docker)
-- **Email**: Laravel Mailables + queues for asynchronous notification delivery
-
-**Frontend**
-- **Engine**: Laravel Blade templating
-- **Styling**: Custom CSS (Utility-driven, pure CSS architecture)
-- **Interactivity**: Vanilla JavaScript with AJAX/Fetch API for seamless chat and updates
-
-**DevOps & Deployment**
-- **Containerization**: Docker & Docker Compose
-- **Web Server**: Nginx Alpine
+### 🛠️ For Administrators
+- Central dashboard for all reports
+- Filtering by:
+  - Status
+  - Type (anonymous / registered)
+- Status management:
+  - Received → Under Review → Inquiry → Closed
+- Secure identity reveal (logged and controlled)
+- Full audit trail of all actions
+- File access and message management
 
 ## 🏗️ Architecture Overview
 
-The application follows the MVC (Model-View-Controller) design pattern integrated with Repository and Service layers to maintain clean boundaries between HTTP requests and business logic. 
+The system follows a clean MVC architecture with service and policy layers:
 
-**Key Architectural Decisions:**
-1. **Separation of Concerns**: Dedicated `ReportService`, `ActivityLogService`, and `AnonymousCredentialsService` classes.
-2. **Strict Authorization**: Extensive use of Laravel Policies and Middleware to prevent unauthorized horizontal or vertical access.
-3. **Optimized I/O**: Eager loading (`with()`, `withCount()`) applied globally to prevent N+1 query performance bottlenecks.
+- **Controllers** → handle HTTP requests
+- **Form Requests** → validation
+- **Services** → business logic
+- **Policies** → authorization
+- **Models** → database structure
 
-## 🔒 Security Posture
+**Key Components:**
+- `AnonymousCredentialsService` → generates secure credentials
+- `ActivityLogService` → audit logging with anonymization
+- `ReportPolicy` → access control (view, update, reveal identity)
 
-Security is the cornerstone of this application, given the sensitivity of whistleblower data.
+## 🛠️ Tech Stack
 
-- **CSPRNG Tokens**: Utilization of cryptographically secure pseudo-random number generators for tracking links.
-- **Password Hashing**: Bcrypt encryption for all stored passwords and anonymous passphrases.
-- **Protection Against Scraping / Brute Force**: Rate-limiting applied specifically on authentication routes (`throttle:10,1`).
-- **Session Isolation**: Strong differentiation between standard authenticated sessions and ephemeral token-based whistleblower sessions.
-- **Input Sanitization & CSRF**: Global CSRF protection and strict request validation (`FormRequests`) mitigating SQLi and XSS vectors.
+**Backend**
+- Laravel 13 (PHP 8.3+)
+- Authentication: Laravel Sanctum + Sessions
+- Email: Laravel Mail (queued)
+
+**Frontend**
+- Blade Templates
+- Vanilla JavaScript (AJAX / Fetch)
+- Custom CSS
+
+**Database**
+- MySQL 8 (Docker)
+- SQLite (local development)
+
+**DevOps**
+- Docker & Docker Compose
+- Nginx (reverse proxy)
+- PHP-FPM
+
+## 🔒 Security Features
+
+Security is a core part of the system:
+
+- 🔐 Cryptographically secure token generation
+- 🔑 Bcrypt password hashing
+- 🛡️ CSRF protection on all forms
+- 🚫 Rate limiting:
+  - Reports: 5/hour
+  - Login: 10/min
+- 🕵️ IP anonymization for whistleblowers
+- 🔍 Audit logging of:
+  - Status changes
+  - Identity reveals
+  - Report access
+- 🔒 Strict authorization via Policies & Middleware
+
+## 🔑 Demo Access
+
+**Admin**
+- **Email:** admin@example.com
+- **Password:** password
+
+**Anonymous Flow**
+1. Submit a report
+2. Save generated credentials
+3. Access via `/track/{token}`
 
 ## 🚀 Installation & Setup
 
-### Option 1: Docker (Recommended for Production/Assessment)
+### 🐳 Option 1: Docker (Recommended)
+```bash
+git clone https://github.com/yourusername/hinweisgeberportal.git
+cd hinweisgeberportal
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/ephilos-portal.git
-   cd ephilos-portal
-   ```
+cp .env.example .env
 
-2. Setup Environment Variables:
-   ```bash
-   cp .env.example .env
-   ```
-   *Note: Docker is configured to use MySQL by default. Modify `DB_*` in `.env` if needed.*
+docker-compose up -d --build
+```
+App will be available at: http://localhost:8000
 
-3. Spin up the containers:
-   ```bash
-   docker compose up -d --build
-   ```
+### 💻 Option 2: Local Development (SQLite)
+```bash
+composer install
+cp .env.example .env
 
-4. Install dependencies and run migrations (inside container):
-   ```bash
-   docker compose exec app composer install
-   docker compose exec app php artisan key:generate
-   docker compose exec app php artisan migrate --seed
-   ```
+php artisan key:generate
 
-The application will be accessible at `http://localhost:8000`.
+touch database/database.sqlite
 
-### Option 2: Local Development (SQLite)
+php artisan migrate --seed
+php artisan serve
+```
 
-1. Ensure PHP 8.3 and Composer are installed.
-2. Configure `.env` to use SQLite:
-   ```env
-   DB_CONNECTION=sqlite
-   # Remove DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD
-   ```
-3. Run initialization commands:
-   ```bash
-   composer install
-   php artisan key:generate
-   touch database/database.sqlite
-   php artisan migrate --seed
-   php artisan serve
-   ```
+## 📖 Usage
 
-## 📖 Usage Guide
+**Anonymous Reporting**
+1. Go to `/`
+2. Submit report via 4-step form
+3. Save credentials
+4. Track via `/track/{token}`
 
-### 1. The Anonymous Flow
-- Navigate to the **Home Page**.
-- Select "Anonymous" and submit a mock report.
-- Carefully copy the generated Auto-Credentials (`WB-...` and password/link).
-- Log out (or open an incognito window), navigate to `/track/{token}`, and log in to view the active chat.
+**Admin Workflow**
+1. Login via `/login`
+2. View reports in dashboard
+3. Change status
+4. Reply via chat
+5. Check audit logs
 
-### 2. The Admin Experience
-- **Login Credentials** (if seeded via `DatabaseSeeder`):
-  - Email: `admin@hinweisgeberportal.de`
-  - Password: `password`
-- Visit the Dashboard to see incoming reports.
-- Reply to the anonymous report you just submitted. Check the audit logs.
+## 📂 Project Structure
+```text
+app/
+ ├── Http/
+ ├── Models/
+ ├── Services/
+ ├── Policies/
+ ├── Mail/
+
+resources/views/
+routes/
+database/
+docker/
+```
 
 ## 📸 Screenshots
 
-| Public Reporting Form | Admin Dashboard |
-|:---:|:---:|
-| <img src="docs/screenshots/form-placeholder.png" width="400" alt="Reporting Form"> | <img src="docs/screenshots/dashboard-placeholder.png" width="400" alt="Admin Dashboard"> |
-
-| Anonymous Chat Interface | Case Detail & Audit Log |
-|:---:|:---:|
-| <img src="docs/screenshots/chat-placeholder.png" width="400" alt="Chat UI"> | <img src="docs/screenshots/audit-placeholder.png" width="400" alt="Audit Log"> |
-
-*(Placeholders: Add actual screenshots to a `docs/screenshots` folder)*
+*(Add real screenshots here to impress recruiters)*
 
 ## 🔮 Future Improvements
-
-Though the portal is production-ready, planned roadmap features include:
-- **AES-256 File Encryption**: At-rest encryption for sensitive attachments to protect against server compromise.
-- **Two-Factor Authentication (2FA)**: Mandatory TOTP (Google Authenticator) for Admin accounts.
-- **Data Export capabilities**: Generating PDF summaries and CSV exports for case archiving.
-- **Analytics Module**: Visualizing report volume, categorizations, and resolution times via dynamic charts.
+- [ ] AES-256 encryption for uploaded files
+- [ ] Two-Factor Authentication (2FA) for admins
+- [ ] PDF / CSV export for reports
+- [ ] Analytics dashboard (charts & metrics)
+- [ ] Pagination for large datasets
 
 ## 👨‍💻 Author
 
 **Khadija Ahmada**
-- **Role**: Senior Full-Stack Developer
-- **LinkedIn**: [Your LinkedIn Profile](https://linkedin.com/in/yourprofile)
-- **GitHub**: [Your GitHub Profile](https://github.com/yourusername)
+*Full-Stack Developer*
 
-*Built to demonstrate scalable architecture, robust security principles, and compliant SaaS design.*
+- GitHub: https://github.com/yourusername
+- LinkedIn: https://linkedin.com/in/yourprofile
+
+## 📌 Note
+
+This project was developed as part of a technical assessment and focuses on real-world challenges in:
+- Security
+- Compliance (HinSchG)
+- Data protection
+- Scalable SaaS architecture
