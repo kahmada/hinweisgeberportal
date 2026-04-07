@@ -164,30 +164,3 @@ routes/
 database/
 docker/
 ```
-
-## 📸 Screenshots
-
-*(Add real screenshots here to impress recruiters)*
-
-## 🔮 Future Improvements
-- [ ] AES-256 encryption for uploaded files
-- [ ] Two-Factor Authentication (2FA) for admins
-- [ ] PDF / CSV export for reports
-- [ ] Analytics dashboard (charts & metrics)
-- [ ] Pagination for large datasets
-
-## 👨‍💻 Author
-
-**Khadija Ahmada**
-*Full-Stack Developer*
-
-- GitHub: https://github.com/yourusername
-- LinkedIn: https://linkedin.com/in/yourprofile
-
-## 📌 Note
-
-This project was developed as part of a technical assessment and focuses on real-world challenges in:
-- Security
-- Compliance (HinSchG)
-- Data protection
-- Scalable SaaS architecture
