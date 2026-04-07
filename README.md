@@ -1,129 +1,111 @@
-# 🛡️ Whistleblower Portal (HinSchG Compliant)
+🛡️ Whistleblower-Portal (HinSchG-konform)
 
-A secure and production-ready SaaS application designed to comply with the German Hinweisgeberschutzgesetz (HinSchG) and the EU Whistleblower Directive.
+Eine sichere und produktionsreife SaaS-Anwendung zur Einhaltung des deutschen Hinweisgeberschutzgesetzes (HinSchG) sowie der EU-Whistleblower-Richtlinie.
 
-The platform enables anonymous and secure reporting of misconduct, while providing organizations with powerful tools to manage, investigate, and respond to reports — without compromising the identity of the whistleblower.
+Die Plattform ermöglicht anonyme und sichere Meldungen von Fehlverhalten und bietet Organisationen leistungsstarke Werkzeuge zur Verwaltung, Untersuchung und Bearbeitung dieser Meldungen — ohne die Identität der Hinweisgeber zu gefährden.
 
-## 🎯 Project Overview
+🎯 Projektübersicht
 
-This project implements a complete whistleblower system with:
+Dieses Projekt implementiert ein vollständiges Whistleblower-System mit:
 
-- Anonymous and registered reporting flows
-- Secure tracking via token-based access
-- Two-way communication between whistleblower and admin
-- Full audit logging and strict access control
-- Strong focus on data protection and security
+Anonymen und registrierten Meldeprozessen
+Sicherem Tracking über tokenbasierten Zugriff
+Zwei-Wege-Kommunikation zwischen Hinweisgeber und Administrator
+Vollständigem Audit-Logging und strikter Zugriffskontrolle
+Starker Fokus auf Datenschutz und Sicherheit
 
-The system is designed to simulate a real-world SaaS compliance platform.
+Das System simuliert eine reale SaaS-Compliance-Plattform.
 
-## ✨ Core Features
+✨ Hauptfunktionen
+🕵️ Für Hinweisgeber
+Anonyme Meldung (kein Konto erforderlich)
+Sicheres Tracking über:
+WB-XXXXXXXX Benutzername
+Einmalpasswort
+Individuelle Zugriffs-URL (/track/{token})
+Anonymer Zwei-Wege-Chat mit Administratoren
+Datei-Uploads (PDF, DOC, JPG, PNG, TXT — max. 10MB)
+Vollständiger Identitätsschutz (keine IP-Speicherung, keine personenbezogenen Daten erforderlich)
+👤 Für registrierte Benutzer
+Meldungserstellung mit Benutzerkonto
+Persönliches Dashboard zur Verfolgung von Meldungen
+Chat- und Benachrichtigungssystem
+Identität standardmäßig im Admin-Bereich verborgen
+🛠️ Für Administratoren
+Zentrales Dashboard für alle Meldungen
+Filtermöglichkeiten:
+Status
+Typ (anonym / registriert)
+Statusverwaltung:
+Eingegangen → In Prüfung → Untersuchung → Geschlossen
+Kontrollierte und protokollierte Identitätsfreigabe
+Vollständige Audit-Historie aller Aktionen
+Zugriff auf Dateien und Nachrichtenverwaltung
+🏗️ Architekturübersicht
 
-### 🕵️ For Whistleblowers
-- Anonymous report submission (no account required)
-- Secure tracking via:
-  - `WB-XXXXXXXX` username
-  - One-time password
-  - Unique access URL (`/track/{token}`)
-- Two-way anonymous chat with administrators
-- File attachments (PDF, DOC, JPG, PNG, TXT — max 10MB)
-- Full identity protection (no IP logging, no personal data required)
+Das System basiert auf einer sauberen MVC-Architektur mit Service- und Policy-Schichten:
 
-### 👤 For Registered Users
-- Account-based report submission
-- Personal dashboard to track reports
-- Chat and notification system
-- Identity hidden by default in admin view
+Controller → Verarbeitung von HTTP-Anfragen
+Form Requests → Validierung
+Services → Geschäftslogik
+Policies → Autorisierung
+Models → Datenbankstruktur
+Zentrale Komponenten:
+AnonymousCredentialsService → Generierung sicherer Zugangsdaten
+ActivityLogService → Audit-Logging mit Anonymisierung
+ReportPolicy → Zugriffskontrolle (Anzeigen, Bearbeiten, Identitätsfreigabe)
+🛠️ Technologie-Stack
+Backend
+Laravel 13 (PHP 8.3+)
+Authentifizierung: Laravel Sanctum + Sessions
+E-Mail: Laravel Mail (Queue-basiert)
+Frontend
+Blade Templates
+Vanilla JavaScript (AJAX / Fetch)
+Eigenes CSS
+Datenbank
+MySQL 8 (Docker)
+SQLite (lokale Entwicklung)
+DevOps
+Docker & Docker Compose
+Nginx (Reverse Proxy)
+PHP-FPM
+🔒 Sicherheitsfunktionen
 
-### 🛠️ For Administrators
-- Central dashboard for all reports
-- Filtering by:
-  - Status
-  - Type (anonymous / registered)
-- Status management:
-  - Received → Under Review → Inquiry → Closed
-- Secure identity reveal (logged and controlled)
-- Full audit trail of all actions
-- File access and message management
+Sicherheit steht im Mittelpunkt des Systems:
 
-## 🏗️ Architecture Overview
-
-The system follows a clean MVC architecture with service and policy layers:
-
-- **Controllers** → handle HTTP requests
-- **Form Requests** → validation
-- **Services** → business logic
-- **Policies** → authorization
-- **Models** → database structure
-
-**Key Components:**
-- `AnonymousCredentialsService` → generates secure credentials
-- `ActivityLogService` → audit logging with anonymization
-- `ReportPolicy` → access control (view, update, reveal identity)
-
-## 🛠️ Tech Stack
-
-**Backend**
-- Laravel 13 (PHP 8.3+)
-- Authentication: Laravel Sanctum + Sessions
-- Email: Laravel Mail (queued)
-
-**Frontend**
-- Blade Templates
-- Vanilla JavaScript (AJAX / Fetch)
-- Custom CSS
-
-**Database**
-- MySQL 8 (Docker)
-- SQLite (local development)
-
-**DevOps**
-- Docker & Docker Compose
-- Nginx (reverse proxy)
-- PHP-FPM
-
-## 🔒 Security Features
-
-Security is a core part of the system:
-
-- 🔐 Cryptographically secure token generation
-- 🔑 Bcrypt password hashing
-- 🛡️ CSRF protection on all forms
-- 🚫 Rate limiting:
-  - Reports: 5/hour
-  - Login: 10/min
-- 🕵️ IP anonymization for whistleblowers
-- 🔍 Audit logging of:
-  - Status changes
-  - Identity reveals
-  - Report access
-- 🔒 Strict authorization via Policies & Middleware
-
-## 🔑 Demo Access
-
-**Admin**
-- **Email:** admin@example.com
-- **Password:** password
-
-**Anonymous Flow**
-1. Submit a report
-2. Save generated credentials
-3. Access via `/track/{token}`
-
-## 🚀 Installation & Setup
-
-### 🐳 Option 1: Docker (Recommended)
-```bash
+🔐 Kryptografisch sichere Token-Generierung
+🔑 Passwort-Hashing mit Bcrypt
+🛡️ CSRF-Schutz für alle Formulare
+🚫 Rate Limiting:
+Meldungen: 5/Stunde
+Login: 10/Minute
+🕵️ IP-Anonymisierung für Hinweisgeber
+🔍 Audit-Logging von:
+Statusänderungen
+Identitätsfreigaben
+Zugriffen auf Meldungen
+🔒 Strikte Autorisierung über Policies & Middleware
+🔑 Demo-Zugang
+Admin
+E-Mail: admin@example.com
+Passwort: password
+Anonymer Ablauf
+Meldung erstellen
+Zugangsdaten speichern
+Zugriff über /track/{token}
+🚀 Installation & Setup
+🐳 Option 1: Docker (empfohlen)
 git clone https://github.com/yourusername/hinweisgeberportal.git
 cd hinweisgeberportal
 
 cp .env.example .env
 
 docker-compose up -d --build
-```
-App will be available at: http://localhost:8000
 
-### 💻 Option 2: Local Development (SQLite)
-```bash
+Die Anwendung ist erreichbar unter: http://localhost:8000
+
+💻 Option 2: Lokale Entwicklung (SQLite)
 composer install
 cp .env.example .env
 
@@ -133,25 +115,19 @@ touch database/database.sqlite
 
 php artisan migrate --seed
 php artisan serve
-```
-
-## 📖 Usage
-
-**Anonymous Reporting**
-1. Go to `/`
-2. Submit report via 4-step form
-3. Save credentials
-4. Track via `/track/{token}`
-
-**Admin Workflow**
-1. Login via `/login`
-2. View reports in dashboard
-3. Change status
-4. Reply via chat
-5. Check audit logs
-
-## 📂 Project Structure
-```text
+📖 Nutzung
+Anonyme Meldung
+Öffne /
+Erstelle eine Meldung über das 4-Schritte-Formular
+Zugangsdaten speichern
+Zugriff über /track/{token}
+Admin-Workflow
+Login über /login
+Meldungen im Dashboard anzeigen
+Status ändern
+Über Chat antworten
+Audit-Logs prüfen
+📂 Projektstruktur
 app/
  ├── Http/
  ├── Models/
@@ -163,4 +139,3 @@ resources/views/
 routes/
 database/
 docker/
-```
