@@ -95,6 +95,7 @@
             border-radius: var(--radius);
             overflow: hidden;
             margin: 1rem 0;
+            table-layout: fixed;
         }
 
         .credentials-table tr td {
@@ -105,7 +106,7 @@
 
         .credentials-table tr:last-child td { border-bottom: none; }
         .credentials-table td:first-child { font-weight: 500; color: var(--text-muted); width: 130px; }
-        .credentials-table td:last-child { font-family: monospace; font-size: 14px; }
+        .credentials-table td:last-child { font-family: monospace; font-size: 14px; word-break: break-all; }
 
         .copy-btn {
             background: none;
@@ -145,22 +146,46 @@
         .review-row:last-child { border-bottom: none; }
         .review-key { font-weight: 500; color: var(--text-muted); width: 140px; flex-shrink: 0; }
         .review-val { color: var(--text); }
+        
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: var(--primary);
+            color: white;
+            padding: 16px 32px;
+            font-size: 16px;
+            text-align: center;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 5000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .toast.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
     </style>
 </head>
 <body>
+    <div id="toast" class="toast">Hinweis absenden</div>
     <header class="site-header">
-        <a href="/" style="font-size: 15px; font-weight: 700; color: #005FB8; text-decoration: none;">{{ __('messages.common.portal_name') }}</a>
+        <a href="/" style="font-size: 15px; font-weight: 700; color: #005FB8; text-decoration: none;">Hinweisgeberportal</a>
         <nav style="display: flex; gap: 8px; align-items: center;">
-            @include('partials.lang-switcher')
             @auth
                 @if(auth()->user()->is_admin)
                     <a href="{{ route('admin.reports') }}" class="btn btn-secondary btn-sm">Admin-Bereich</a>
                 @else
-                    <a href="{{ route('user.dashboard') }}" class="btn btn-secondary btn-sm">{{ __('messages.user.my_reports') }}</a>
+                    <a href="{{ route('user.dashboard') }}" class="btn btn-secondary btn-sm">Meine Hinweise</a>
                 @endif
             @else
-                <a href="{{ route('user.login') }}" class="btn btn-secondary btn-sm">{{ __('messages.common.login') }}</a>
-                <a href="{{ route('register') }}" class="btn btn-primary btn-sm">{{ __('messages.common.register') }}</a>
+                <a href="{{ route('user.login') }}" class="btn btn-secondary btn-sm">Anmelden</a>
+                <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Registrieren</a>
             @endauth
         </nav>
     </header>
@@ -301,11 +326,9 @@
                     <div class="step-panel" data-step="4">
                         <div class="alert alert-info">Bitte uberprufen Sie Ihre Angaben vor dem Absenden.</div>
 
-                        <div class="review-block" id="reviewContent"></div>
-
                         <div class="btn-group">
                             <button type="button" class="btn btn-secondary" onclick="prevStep()">Zuruck</button>
-                            <button type="submit" class="btn btn-primary">Hinweis absenden</button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">Hinweis absenden</button>
                         </div>
                     </div>
 
@@ -411,11 +434,29 @@
                 const val = fd.get(key);
                 if (val) html += `<div class="review-row"><div class="review-key">${label}</div><div class="review-val">${val}</div></div>`;
             }
-            document.getElementById('reviewContent').innerHTML = html || '<div class="text-muted text-sm">Keine Angaben</div>';
+            const reviewContent = document.getElementById('reviewContent');
+            if (reviewContent) {
+                reviewContent.innerHTML = html || '<div class="text-muted text-sm">Keine Angaben</div>';
+            }
         }
 
         document.getElementById('reportForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            const toast = document.getElementById('toast');
+            if (toast) {
+                toast.innerText = 'Hinweis absenden';
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn ? submitBtn.innerText : 'Hinweis absenden';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Wird gesendet...';
+            }
+
             const fd = new FormData(this);
             const files = document.getElementById('fileInput').files;
             const submissionType = document.querySelector('input[name="submission_type"]:checked');
@@ -438,7 +479,15 @@
                     },
                     body: JSON.stringify(data)
                 });
-                const result = await res.json();
+                
+                let result = {};
+                try {
+                    result = await res.json();
+                } catch(e) {}
+                
+                if (!res.ok) {
+                    throw new Error(result.message || 'Ein Fehler ist aufgetreten. Bitte laden Sie die Seite neu.');
+                }
 
                 if (result.success) {
                     if (files.length > 0) await uploadFiles(result.report_id || result.report.id, files);
@@ -456,7 +505,11 @@
                     }
                 }
             } catch(err) {
-                alert('Fehler beim Absenden. Bitte versuchen Sie es erneut.');
+                alert(err.message || 'Fehler beim Absenden. Bitte versuchen Sie es erneut.');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalText;
+                }
             }
         });
 
