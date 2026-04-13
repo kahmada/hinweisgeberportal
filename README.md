@@ -122,6 +122,12 @@ Die Standardwerte in `.env.example` sind *bereits auf die Docker-Dienste abgesti
 docker-compose up -d --build
 ```
 
+*Tipp:* Falls Sie eine Fehlermeldung wegen Namenskonflikten erhalten (z.B. `Conflict. The container name "..." is already in use`), entfernen Sie die blockierenden Container mit folgendem Befehl und versuchen Sie es erneut:
+```bash
+docker rm -f app webserver database
+docker-compose up -d --build
+```
+
 Dies startet drei Dienste:
 
 •⁠ ⁠*app* — Container `app`, interner Port — Laravel-Anwendung (PHP 8.4-FPM)
