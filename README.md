@@ -525,9 +525,3 @@ Bei Tests können Sie die Ratenbegrenzung durch Leeren des Caches zurücksetzen:
 ```bash
 php artisan cache:clear
 ```
-
----
-
-## Lizenz
-
-Dieses Projekt wurde im Rahmen einer Projektaufgabe entwickelt.
