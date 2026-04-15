@@ -302,14 +302,16 @@
 
                         <div class="form-group">
                             <label class="form-label">Titel des Hinweises <span style="color: var(--danger);">*</span></label>
-                            <input class="form-control" type="text" name="title" id="title" required placeholder="Kurze Zusammenfassung des Vorfalls">
+                            <input class="form-control" type="text" name="title" id="title" required placeholder="Kurze Zusammenfassung des Vorfalls" minlength="5" maxlength="200">
                             <div id="error-title" class="field-error" style="display:none; color:#dc2626; font-size:12px; margin-top:4px;"></div>
+                            <div class="text-sm text-muted mt-1">Mindestens 5 Zeichen, maximal 200 Zeichen</div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Beschreibung <span style="color: var(--danger);">*</span></label>
-                            <textarea class="form-control" name="description" id="description" required placeholder="Beschreiben Sie den Vorfall so detailliert wie möglich..." style="min-height: 160px;"></textarea>
+                            <textarea class="form-control" name="description" id="description" required placeholder="Beschreiben Sie den Vorfall so detailliert wie möglich..." style="min-height: 160px;" minlength="20"></textarea>
                             <div id="error-description" class="field-error" style="display:none; color:#dc2626; font-size:12px; margin-top:4px;"></div>
+                            <div class="text-sm text-muted mt-1">Mindestens 20 Zeichen für eine aussagekräftige Beschreibung</div>
                         </div>
 
                         <div class="form-group">
@@ -398,6 +400,44 @@
                     validateDateField();
                 });
             }
+            
+            // Real-time validation for title
+            const titleInput = document.getElementById('title');
+            if (titleInput) {
+                titleInput.addEventListener('input', function() {
+                    const val = this.value.trim();
+                    const errEl = document.getElementById('error-title');
+                    if (val.length > 0 && val.length < 5) {
+                        this.style.borderColor = '#f59e0b';
+                        if (errEl) { errEl.textContent = `Noch ${5 - val.length} Zeichen benötigt`; errEl.style.display = 'block'; errEl.style.color = '#f59e0b'; }
+                    } else if (val.length >= 5) {
+                        this.style.borderColor = '#10b981';
+                        if (errEl) errEl.style.display = 'none';
+                    } else {
+                        this.style.borderColor = '';
+                        if (errEl) errEl.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Real-time validation for description
+            const descInput = document.getElementById('description');
+            if (descInput) {
+                descInput.addEventListener('input', function() {
+                    const val = this.value.trim();
+                    const errEl = document.getElementById('error-description');
+                    if (val.length > 0 && val.length < 20) {
+                        this.style.borderColor = '#f59e0b';
+                        if (errEl) { errEl.textContent = `Noch ${20 - val.length} Zeichen benötigt`; errEl.style.display = 'block'; errEl.style.color = '#f59e0b'; }
+                    } else if (val.length >= 20) {
+                        this.style.borderColor = '#10b981';
+                        if (errEl) errEl.style.display = 'none';
+                    } else {
+                        this.style.borderColor = '';
+                        if (errEl) errEl.style.display = 'none';
+                    }
+                });
+            }
         });
 
         function validateDateField() {
@@ -449,22 +489,41 @@
                 const titleErr = document.getElementById('error-title');
                 const descErr = document.getElementById('error-description');
                 let valid = true;
-                if (!titleEl.value.trim()) {
+                
+                // Validate title
+                const titleVal = titleEl.value.trim();
+                if (!titleVal) {
                     titleEl.style.borderColor = '#dc2626';
                     if (titleErr) { titleErr.textContent = 'Bitte geben Sie einen Titel ein.'; titleErr.style.display = 'block'; }
+                    valid = false;
+                } else if (titleVal.length < 5) {
+                    titleEl.style.borderColor = '#dc2626';
+                    if (titleErr) { titleErr.textContent = 'Der Titel muss mindestens 5 Zeichen lang sein.'; titleErr.style.display = 'block'; }
+                    valid = false;
+                } else if (titleVal.length > 200) {
+                    titleEl.style.borderColor = '#dc2626';
+                    if (titleErr) { titleErr.textContent = 'Der Titel darf maximal 200 Zeichen lang sein.'; titleErr.style.display = 'block'; }
                     valid = false;
                 } else {
                     titleEl.style.borderColor = '';
                     if (titleErr) titleErr.style.display = 'none';
                 }
-                if (!descEl.value.trim()) {
+                
+                // Validate description
+                const descVal = descEl.value.trim();
+                if (!descVal) {
                     descEl.style.borderColor = '#dc2626';
                     if (descErr) { descErr.textContent = 'Bitte geben Sie eine Beschreibung ein.'; descErr.style.display = 'block'; }
+                    valid = false;
+                } else if (descVal.length < 20) {
+                    descEl.style.borderColor = '#dc2626';
+                    if (descErr) { descErr.textContent = 'Die Beschreibung muss mindestens 20 Zeichen lang sein.'; descErr.style.display = 'block'; }
                     valid = false;
                 } else {
                     descEl.style.borderColor = '';
                     if (descErr) descErr.style.display = 'none';
                 }
+                
                 if (!valid) return;
             }
             if (currentStep === totalSteps) updateReview();
@@ -615,9 +674,54 @@
 
         document.getElementById('fileInput').addEventListener('change', function(e) {
             const list = document.getElementById('fileList');
-            if (!e.target.files.length) { list.innerHTML = ''; return; }
-            let html = '<div style="margin-top: 8px; font-size: 12px; color: var(--text-muted);">';
-            for (const f of e.target.files) html += `<div>${f.name} (${(f.size/1024).toFixed(1)} KB)</div>`;
+            const maxFiles = 5;
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            const allowedTypes = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'txt'];
+            
+            if (!e.target.files.length) { 
+                list.innerHTML = ''; 
+                return; 
+            }
+            
+            if (e.target.files.length > maxFiles) {
+                list.innerHTML = `<div style="margin-top: 8px; font-size: 12px; color: #dc2626;">⚠️ Maximal ${maxFiles} Dateien erlaubt. Bitte wählen Sie weniger Dateien aus.</div>`;
+                e.target.value = '';
+                return;
+            }
+            
+            let html = '<div style="margin-top: 8px; font-size: 12px;">';
+            let hasError = false;
+            
+            for (const f of e.target.files) {
+                const ext = f.name.split('.').pop().toLowerCase();
+                const sizeKB = (f.size / 1024).toFixed(1);
+                const sizeMB = (f.size / 1024 / 1024).toFixed(2);
+                
+                let status = '';
+                let color = 'var(--text-muted)';
+                
+                if (!allowedTypes.includes(ext)) {
+                    status = ' ❌ Dateityp nicht erlaubt';
+                    color = '#dc2626';
+                    hasError = true;
+                } else if (f.size > maxSize) {
+                    status = ` ❌ Zu groß (max. 10 MB)`;
+                    color = '#dc2626';
+                    hasError = true;
+                } else {
+                    status = ' ✓';
+                    color = '#10b981';
+                }
+                
+                const displaySize = f.size > 1024 * 1024 ? `${sizeMB} MB` : `${sizeKB} KB`;
+                html += `<div style="color: ${color}; padding: 2px 0;">${f.name} (${displaySize})${status}</div>`;
+            }
+            
+            if (hasError) {
+                html += '<div style="margin-top: 6px; color: #dc2626; font-weight: 500;">⚠️ Einige Dateien sind ungültig und werden nicht hochgeladen.</div>';
+                e.target.value = '';
+            }
+            
             list.innerHTML = html + '</div>';
         });
 

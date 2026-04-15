@@ -31,13 +31,25 @@
                 <h1 style="font-size: 18px; font-weight: 700;">Hinweis #{{ $report->id }}</h1>
                 <div style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">Eingereicht am {{ $report->created_at->format('d.m.Y \u\m H:i') }} Uhr</div>
             </div>
-            @php
-                $badges = ['eingegangen'=>'badge-blue','in_pruefung'=>'badge-yellow','rueckfrage'=>'badge-orange','abgeschlossen'=>'badge-green'];
-                $labels = ['eingegangen'=>'Eingegangen','in_pruefung'=>'In Prufung','rueckfrage'=>'Ruckfrage','abgeschlossen'=>'Abgeschlossen'];
-            @endphp
-            <span class="badge {{ $badges[$report->status] ?? 'badge-gray' }}" style="font-size: 13px; padding: 4px 12px;">
-                {{ $labels[$report->status] ?? $report->status }}
-            </span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                @php
+                    $badges = ['eingegangen'=>'badge-blue','in_pruefung'=>'badge-yellow','rueckfrage'=>'badge-orange','abgeschlossen'=>'badge-green'];
+                    $labels = ['eingegangen'=>'Eingegangen','in_pruefung'=>'In Prufung','rueckfrage'=>'Ruckfrage','abgeschlossen'=>'Abgeschlossen'];
+                @endphp
+                <button onclick="window.open('/admin/reports/{{ $report->id }}/export', '_blank')" class="btn btn-secondary btn-sm" title="Als PDF exportieren">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    PDF Export
+                </button>
+                <span class="badge {{ $badges[$report->status] ?? 'badge-gray' }}" style="font-size: 13px; padding: 4px 12px;">
+                    {{ $labels[$report->status] ?? $report->status }}
+                </span>
+            </div>
         </div>
 
         <div class="two-col">

@@ -50,20 +50,30 @@
 
         <div class="card" style="margin-bottom: 1rem;">
             <div class="card-body" style="padding: 1rem 1.5rem;">
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <span style="font-size: 13px; font-weight: 500; color: var(--text-muted);">{{ __('messages.admin.filter') }}</span>
-                    <select id="statusFilter" class="form-control" style="width: auto;">
-                        <option value="">{{ __('messages.admin.all_status') }}</option>
-                        <option value="eingegangen">{{ __('messages.common.status.eingegangen') }}</option>
-                        <option value="in_pruefung">{{ __('messages.common.status.in_pruefung') }}</option>
-                        <option value="rueckfrage">{{ __('messages.common.status.rueckfrage') }}</option>
-                        <option value="abgeschlossen">{{ __('messages.common.status.abgeschlossen') }}</option>
-                    </select>
-                    <select id="typeFilter" class="form-control" style="width: auto;">
-                        <option value="">{{ __('messages.admin.all_types') }}</option>
-                        <option value="anonymous">{{ __('messages.admin.only_anonymous') }}</option>
-                        <option value="registered">{{ __('messages.admin.only_registered') }}</option>
-                    </select>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: space-between;">
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <span style="font-size: 13px; font-weight: 500; color: var(--text-muted);">{{ __('messages.admin.filter') }}</span>
+                        <select id="statusFilter" class="form-control" style="width: auto;">
+                            <option value="">{{ __('messages.admin.all_status') }}</option>
+                            <option value="eingegangen">{{ __('messages.common.status.eingegangen') }}</option>
+                            <option value="in_pruefung">{{ __('messages.common.status.in_pruefung') }}</option>
+                            <option value="rueckfrage">{{ __('messages.common.status.rueckfrage') }}</option>
+                            <option value="abgeschlossen">{{ __('messages.common.status.abgeschlossen') }}</option>
+                        </select>
+                        <select id="typeFilter" class="form-control" style="width: auto;">
+                            <option value="">{{ __('messages.admin.all_types') }}</option>
+                            <option value="anonymous">{{ __('messages.admin.only_anonymous') }}</option>
+                            <option value="registered">{{ __('messages.admin.only_registered') }}</option>
+                        </select>
+                    </div>
+                    <button onclick="exportReports()" class="btn btn-secondary btn-sm" title="Als CSV exportieren">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        CSV Export
+                    </button>
                 </div>
             </div>
         </div>
@@ -134,6 +144,15 @@
         }
         statusFilter.addEventListener('change', applyFilters);
         typeFilter.addEventListener('change', applyFilters);
+
+        function exportReports() {
+            const status = statusFilter.value;
+            const type = typeFilter.value;
+            let url = '/admin/reports/export/csv?';
+            if (status) url += 'status=' + status + '&';
+            if (type) url += 'type=' + type;
+            window.location.href = url;
+        }
     </script>
 </body>
 </html>

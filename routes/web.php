@@ -47,6 +47,8 @@ Route::get('/attachments/{id}/download', [\App\Http\Controllers\AttachmentContro
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('admin.reports');
     Route::get('/admin/reports/{id}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('admin.reports.show');
+    Route::get('/admin/reports/export/csv', [\App\Http\Controllers\Admin\ExportController::class, 'exportCsv'])->name('admin.reports.export.csv');
+    Route::get('/admin/reports/{id}/export', [\App\Http\Controllers\Admin\ExportController::class, 'exportReportHtml'])->name('admin.reports.export.html');
 });
 
 require __DIR__.'/auth.php';
