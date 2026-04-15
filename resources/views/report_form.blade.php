@@ -278,7 +278,8 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                             <div class="form-group">
                                 <label class="form-label">Datum des Vorfalls <span class="optional">(optional)</span></label>
-                                <input class="form-control" type="date" name="incident_date">
+                                <input class="form-control" type="date" name="incident_date" id="incident_date">
+                                <div id="error-incident_date" class="field-error" style="display:none; color:#dc2626; font-size:12px; margin-top:4px;"></div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Ort des Vorfalls <span class="optional">(optional)</span></label>
@@ -301,12 +302,14 @@
 
                         <div class="form-group">
                             <label class="form-label">Titel des Hinweises <span style="color: var(--danger);">*</span></label>
-                            <input class="form-control" type="text" name="title" required placeholder="Kurze Zusammenfassung des Vorfalls">
+                            <input class="form-control" type="text" name="title" id="title" required placeholder="Kurze Zusammenfassung des Vorfalls">
+                            <div id="error-title" class="field-error" style="display:none; color:#dc2626; font-size:12px; margin-top:4px;"></div>
                         </div>
 
                         <div class="form-group">
                             <label class="form-label">Beschreibung <span style="color: var(--danger);">*</span></label>
-                            <textarea class="form-control" name="description" required placeholder="Beschreiben Sie den Vorfall so detailliert wie moglich..." style="min-height: 160px;"></textarea>
+                            <textarea class="form-control" name="description" id="description" required placeholder="Beschreiben Sie den Vorfall so detailliert wie möglich..." style="min-height: 160px;"></textarea>
+                            <div id="error-description" class="field-error" style="display:none; color:#dc2626; font-size:12px; margin-top:4px;"></div>
                         </div>
 
                         <div class="form-group">
@@ -324,10 +327,16 @@
 
                     <!-- Step 4: Review -->
                     <div class="step-panel" data-step="4">
-                        <div class="alert alert-info">Bitte uberprufen Sie Ihre Angaben vor dem Absenden.</div>
+                        <div class="alert alert-info">Bitte überprüfen Sie Ihre Angaben vor dem Absenden.</div>
+
+                        <div class="review-block">
+                            <div id="reviewContent"></div>
+                        </div>
+
+                        <div id="submitErrorBox" style="display:none; background:#fef2f2; border:1px solid #fca5a5; border-radius:var(--radius); padding:12px 16px; margin:1rem 0; color:#991b1b; font-size:13px;"></div>
 
                         <div class="btn-group">
-                            <button type="button" class="btn btn-secondary" onclick="prevStep()">Zuruck</button>
+                            <button type="button" class="btn btn-secondary" onclick="prevStep()">Zurück</button>
                             <button type="submit" class="btn btn-primary" id="submitBtn">Hinweis absenden</button>
                         </div>
                     </div>
@@ -378,6 +387,36 @@
     <script>
         let currentStep = 1;
         const totalSteps = 4;
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        // Set max date on the incident_date input to today
+        document.addEventListener('DOMContentLoaded', function () {
+            const dateInput = document.getElementById('incident_date');
+            if (dateInput) {
+                dateInput.max = todayStr;
+                dateInput.addEventListener('change', function () {
+                    validateDateField();
+                });
+            }
+        });
+
+        function validateDateField() {
+            const dateInput = document.getElementById('incident_date');
+            const errEl = document.getElementById('error-incident_date');
+            if (!dateInput || !dateInput.value) {
+                if (errEl) errEl.style.display = 'none';
+                if (dateInput) dateInput.style.borderColor = '';
+                return true;
+            }
+            if (dateInput.value > todayStr) {
+                dateInput.style.borderColor = '#dc2626';
+                if (errEl) { errEl.textContent = 'Das Vorfallsdatum darf nicht in der Zukunft liegen.'; errEl.style.display = 'block'; }
+                return false;
+            }
+            dateInput.style.borderColor = '';
+            if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+            return true;
+        }
 
         function selectChoice(el, type) {
             document.querySelectorAll('.choice-card').forEach(c => c.classList.remove('selected'));
@@ -401,10 +440,32 @@
         }
 
         function nextStep() {
+            if (currentStep === 2) {
+                if (!validateDateField()) return;
+            }
             if (currentStep === 3) {
-                const title = document.querySelector('[name="title"]').value.trim();
-                const desc = document.querySelector('[name="description"]').value.trim();
-                if (!title || !desc) { alert('Bitte fullen Sie Titel und Beschreibung aus.'); return; }
+                const titleEl = document.getElementById('title');
+                const descEl = document.getElementById('description');
+                const titleErr = document.getElementById('error-title');
+                const descErr = document.getElementById('error-description');
+                let valid = true;
+                if (!titleEl.value.trim()) {
+                    titleEl.style.borderColor = '#dc2626';
+                    if (titleErr) { titleErr.textContent = 'Bitte geben Sie einen Titel ein.'; titleErr.style.display = 'block'; }
+                    valid = false;
+                } else {
+                    titleEl.style.borderColor = '';
+                    if (titleErr) titleErr.style.display = 'none';
+                }
+                if (!descEl.value.trim()) {
+                    descEl.style.borderColor = '#dc2626';
+                    if (descErr) { descErr.textContent = 'Bitte geben Sie eine Beschreibung ein.'; descErr.style.display = 'block'; }
+                    valid = false;
+                } else {
+                    descEl.style.borderColor = '';
+                    if (descErr) descErr.style.display = 'none';
+                }
+                if (!valid) return;
             }
             if (currentStep === totalSteps) updateReview();
             if (currentStep < totalSteps) {
@@ -440,22 +501,53 @@
             }
         }
 
+        function clearErrors() {
+            document.querySelectorAll('.field-error').forEach(el => { el.style.display = 'none'; el.textContent = ''; });
+            document.querySelectorAll('.form-control').forEach(el => { el.style.borderColor = ''; });
+            const box = document.getElementById('submitErrorBox');
+            if (box) { box.style.display = 'none'; box.innerHTML = ''; }
+        }
+
+        function showSubmitError(msg) {
+            const box = document.getElementById('submitErrorBox');
+            if (box) {
+                box.innerHTML = '<strong>Fehler:</strong> ' + msg;
+                box.style.display = 'block';
+            }
+        }
+
+        function showValidationErrors(errors) {
+            const stepForField = { incident_date: 2, incident_location: 2, company: 2, title: 3, description: 3, involved_persons: 3 };
+            let msgs = [];
+            let firstStep = null;
+            for (const [field, messages] of Object.entries(errors)) {
+                const errEl = document.getElementById('error-' + field);
+                const inputEl = document.querySelector('[name="' + field + '"]');
+                if (errEl) { errEl.textContent = messages[0]; errEl.style.display = 'block'; }
+                if (inputEl) inputEl.style.borderColor = '#dc2626';
+                msgs.push(messages[0]);
+                if (stepForField[field] && !firstStep) firstStep = stepForField[field];
+            }
+            const box = document.getElementById('submitErrorBox');
+            if (box) {
+                let html = '<strong>Bitte korrigieren Sie folgende Fehler:</strong><ul style="margin:6px 0 0 16px;padding:0;">';
+                msgs.forEach(m => { html += '<li>' + m + '</li>'; });
+                html += '</ul>';
+                if (firstStep) {
+                    html += '<div style="margin-top:8px;font-size:13px;"><a href="#" onclick="currentStep=' + firstStep + ';showStep(' + firstStep + ');window.scrollTo(0,0);return false;" style="color:#991b1b;font-weight:600;text-decoration:underline;">→ Zum Fehler navigieren (Schritt ' + firstStep + ')</a></div>';
+                }
+                box.innerHTML = html;
+                box.style.display = 'block';
+            }
+        }
+
         document.getElementById('reportForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const toast = document.getElementById('toast');
-            if (toast) {
-                toast.innerText = 'Hinweis absenden';
-                toast.classList.add('show');
-                setTimeout(() => toast.classList.remove('show'), 3000);
-            }
-            
+            clearErrors();
+
             const submitBtn = document.getElementById('submitBtn');
             const originalText = submitBtn ? submitBtn.innerText : 'Hinweis absenden';
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerText = 'Wird gesendet...';
-            }
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.innerText = 'Wird gesendet...'; }
 
             const fd = new FormData(this);
             const files = document.getElementById('fileInput').files;
@@ -479,19 +571,22 @@
                     },
                     body: JSON.stringify(data)
                 });
-                
+
                 let result = {};
-                try {
-                    result = await res.json();
-                } catch(e) {}
-                
+                try { result = await res.json(); } catch(e) {}
+
                 if (!res.ok) {
-                    throw new Error(result.message || 'Ein Fehler ist aufgetreten. Bitte laden Sie die Seite neu.');
+                    if (res.status === 422 && result.errors) {
+                        showValidationErrors(result.errors);
+                    } else {
+                        showSubmitError(result.message || 'Ein Fehler ist aufgetreten. Bitte laden Sie die Seite neu.');
+                    }
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = originalText; }
+                    return;
                 }
 
                 if (result.success) {
                     if (files.length > 0) await uploadFiles(result.report_id || result.report.id, files);
-
                     if (isAnonymous) {
                         document.getElementById('cred-username').textContent = result.credentials.username;
                         document.getElementById('cred-password').textContent = result.credentials.password;
@@ -505,11 +600,8 @@
                     }
                 }
             } catch(err) {
-                alert(err.message || 'Fehler beim Absenden. Bitte versuchen Sie es erneut.');
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = originalText;
-                }
+                showSubmitError(err.message || 'Fehler beim Absenden. Bitte versuchen Sie es erneut.');
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = originalText; }
             }
         });
 

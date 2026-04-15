@@ -72,11 +72,15 @@
                     <div id="messages-container" class="messages-box">
                         <div style="text-align:center;color:var(--text-muted);font-size:13px;padding:2rem 0;">Nachrichten werden geladen...</div>
                     </div>
+                    <div id="chatClosedNotice" style="display:none; background:#fef2f2; border:1px solid #fca5a5; border-radius:4px; padding:10px 14px; margin-top:10px; color:#991b1b; font-size:13px;">
+                        &#9888; Dieser Hinweis ist abgeschlossen. Nachrichten können nicht mehr gesendet werden.
+                    </div>
+                    <div id="messageSendError" style="display:none; background:#fef2f2; border:1px solid #fca5a5; border-radius:4px; padding:8px 12px; margin-top:8px; color:#991b1b; font-size:12px;"></div>
                     <div style="display: flex; gap: 8px; margin-top: 10px;">
                         <textarea id="messageInput" class="form-control" placeholder="Ihre Nachricht..." style="min-height: 70px; flex: 1;"></textarea>
                     </div>
                     <div style="margin-top: 8px; text-align: right;">
-                        <button class="btn btn-primary btn-sm" onclick="sendMessage()">Senden</button>
+                        <button id="sendMessageBtn" class="btn btn-primary btn-sm" onclick="sendMessage()">Senden</button>
                     </div>
                 </div>
             </div>
@@ -85,6 +89,18 @@
 
     <script>
         const reportId = {{ $report->id }};
+        const reportStatus = '{{ $report->status }}';
+
+        function initChatUI() {
+            if (reportStatus === 'abgeschlossen') {
+                const notice = document.getElementById('chatClosedNotice');
+                const input = document.getElementById('messageInput');
+                const btn = document.getElementById('sendMessageBtn');
+                if (notice) notice.style.display = 'block';
+                if (input) { input.disabled = true; input.style.opacity = '0.5'; input.placeholder = 'Hinweis abgeschlossen – keine neuen Nachrichten möglich'; }
+                if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
+            }
+        }
 
         async function loadMessages() {
             try {
@@ -112,9 +128,12 @@
         }
 
         async function sendMessage() {
+            if (reportStatus === 'abgeschlossen') return;
             const input = document.getElementById('messageInput');
+            const errEl = document.getElementById('messageSendError');
             const msg = input.value.trim();
             if (!msg) return;
+            if (errEl) errEl.style.display = 'none';
             try {
                 const res = await fetch(`/report/${reportId}/messages`, {
                     method: 'POST',
@@ -126,7 +145,10 @@
                 });
                 const data = await res.json();
                 if (data.success) { input.value = ''; loadMessages(); }
-            } catch(e) {}
+                else if (errEl) { errEl.textContent = data.message || 'Fehler beim Senden.'; errEl.style.display = 'block'; }
+            } catch(e) {
+                if (errEl) { errEl.textContent = 'Verbindungsfehler. Bitte versuchen Sie es erneut.'; errEl.style.display = 'block'; }
+            }
         }
 
         async function markRead() {
@@ -140,6 +162,7 @@
 
         function escHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
+        initChatUI();
         loadMessages();
         setInterval(loadMessages, 10000);
     </script>

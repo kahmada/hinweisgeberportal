@@ -17,11 +17,23 @@ class StoreReportRequest extends FormRequest
             'title'             => 'required|string|max:255',
             'company'           => 'nullable|string|max:255',
             'violation_type'    => 'nullable|string|max:255',
-            'incident_date'     => 'nullable|date',
+            'incident_date'     => 'nullable|date|before_or_equal:today',
             'incident_location' => 'nullable|string|max:255',
             'involved_persons'  => 'nullable|string',
             'description'       => 'required|string',
             'is_anonymous'      => 'boolean',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'title.required'                => 'Bitte geben Sie einen Titel für den Hinweis ein.',
+            'title.max'                     => 'Der Titel darf maximal 255 Zeichen enthalten.',
+            'description.required'          => 'Bitte geben Sie eine Beschreibung des Vorfalls ein.',
+            'incident_date.date'            => 'Bitte geben Sie ein gültiges Datum ein.',
+            'incident_date.before_or_equal' => 'Das Vorfallsdatum darf nicht in der Zukunft liegen.',
+        ];
+    }
 }
+

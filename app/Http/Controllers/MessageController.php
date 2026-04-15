@@ -51,6 +51,14 @@ class MessageController extends Controller
 
         $report = Report::findOrFail($reportId);
 
+        // Prevent sending messages on closed reports
+        if ($report->status === 'abgeschlossen') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dieser Hinweis ist abgeschlossen. Neue Nachrichten können nicht mehr gesendet werden.',
+            ], 422);
+        }
+
         // Determine sender type
         if (auth()->check() && auth()->user()->is_admin) {
             // Admin sending message
