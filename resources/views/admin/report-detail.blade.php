@@ -218,7 +218,7 @@
 
         async function loadMessages() {
             try {
-                const res = await fetch(`/api/reports/${reportId}/messages`, {
+                const res = await fetch(`/admin/reports/${reportId}/messages`, {
                     headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                     credentials: 'same-origin'
                 });
@@ -252,7 +252,7 @@
             if (!msg) return;
             if (errEl) errEl.style.display = 'none';
             try {
-                const res = await fetch(`/api/reports/${reportId}/messages`, {
+                const res = await fetch(`/admin/reports/${reportId}/messages`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -273,7 +273,7 @@
 
         async function markRead() {
             try {
-                await fetch(`/api/reports/${reportId}/messages/mark-read`, {
+                await fetch(`/admin/reports/${reportId}/messages/mark-read`, {
                     method: 'POST',
                     headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
                     credentials: 'same-origin'
@@ -284,7 +284,7 @@
         async function updateStatus() {
             const status = document.getElementById('statusSelect').value;
             try {
-                const res = await fetch(`/api/reports/${reportId}`, {
+                const res = await fetch(`/admin/reports/${reportId}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -303,7 +303,7 @@
         async function confirmRevealIdentity() {
             if (!confirm('Identitat enthullen?\n\nDiese Aktion wird protokolliert und kann nicht ruckgangig gemacht werden.')) return;
             try {
-                const res = await fetch(`/api/reports/${reportId}/reveal-identity`, {
+                const res = await fetch(`/admin/reports/${reportId}/reveal-identity`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

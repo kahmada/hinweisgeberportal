@@ -49,6 +49,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/reports/{id}', [\App\Http\Controllers\Admin\ReportController::class, 'show'])->name('admin.reports.show');
     Route::get('/admin/reports/export/csv', [\App\Http\Controllers\Admin\ExportController::class, 'exportCsv'])->name('admin.reports.export.csv');
     Route::get('/admin/reports/{id}/export', [\App\Http\Controllers\Admin\ExportController::class, 'exportReportHtml'])->name('admin.reports.export.html');
+    
+    // Admin message routes (web-based)
+    Route::get('/admin/reports/{id}/messages', [\App\Http\Controllers\MessageController::class, 'index'])->name('admin.reports.messages.index');
+    Route::post('/admin/reports/{id}/messages', [\App\Http\Controllers\MessageController::class, 'store'])->name('admin.reports.messages.store');
+    Route::post('/admin/reports/{id}/messages/mark-read', [\App\Http\Controllers\MessageController::class, 'markAsRead'])->name('admin.reports.messages.read');
+    
+    // Admin report update routes (web-based)
+    Route::patch('/admin/reports/{id}', [ReportController::class, 'update'])->name('admin.reports.update');
+    Route::post('/admin/reports/{id}/reveal-identity', [ReportController::class, 'revealIdentity'])->name('admin.reports.reveal');
 });
 
 require __DIR__.'/auth.php';
