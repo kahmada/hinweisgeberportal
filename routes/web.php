@@ -4,6 +4,10 @@ use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    return view('landing');
+});
+
+Route::get('/submit', function () {
     return view('report_form');
 });
 

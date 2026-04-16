@@ -2,23 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreAttachmentRequest;
 use App\Models\Attachment;
 use App\Models\Report;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AttachmentController extends Controller
 {
     use AuthorizesRequests;
-    public function store(Request $request, int $reportId)
-    {
-        $request->validate([
-            'files' => 'required|array|max:5',
-            'files.*' => 'file|max:10240|mimes:pdf,doc,docx,jpg,jpeg,png,txt',
-        ]);
 
+    public function store(StoreAttachmentRequest $request, int $reportId)
+    {
+        $validated = $request->validated();
         $report = Report::findOrFail($reportId);
         $this->authorize('uploadAttachment', $report);
 
@@ -30,6 +27,7 @@ class AttachmentController extends Controller
         $uploadedFiles = [];
 
         foreach ($request->file('files') as $file) {
+            // Generate secure filename
             $filename = Str::random(40) . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('attachments', $filename, 'local');
 
@@ -60,15 +58,20 @@ class AttachmentController extends Controller
         $path = storage_path('app/attachments/' . $attachment->filename);
 
         if (!file_exists($path)) {
-            abort(404);
+            abort(404, 'Datei nicht gefunden');
         }
 
         return response()->download($path, $attachment->original_filename, [
             'Content-Type' => $attachment->mime_type,
             'X-Content-Type-Options' => 'nosniff',
+            'X-Frame-Options' => 'DENY',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
         ]);
     }
 
+    /**
+     * Validate file content for security
+     */
     private function validateFileContent($file): void
     {
         $allowedMimes = [
@@ -80,26 +83,35 @@ class AttachmentController extends Controller
             'text/plain',
         ];
 
+        // Check actual MIME type using finfo
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $file->getRealPath());
+        $actualMimeType = finfo_file($finfo, $file->getRealPath());
         finfo_close($finfo);
 
-        if (!in_array($mimeType, $allowedMimes)) {
+        if (!in_array($actualMimeType, $allowedMimes)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
                 ['files' => ['Dateityp nicht erlaubt. Nur PDF, DOC, DOCX, JPG, PNG und TXT sind zulässig.']]
             );
         }
 
-        // Check for executable content in filename
+        // Check for dangerous extensions
         $filename = $file->getClientOriginalName();
-        $dangerousExtensions = ['exe', 'bat', 'cmd', 'sh', 'php', 'js', 'html', 'htm', 'phtml'];
+        $dangerousExtensions = ['exe', 'bat', 'cmd', 'sh', 'php', 'js', 'html', 'htm', 'phtml', 'asp', 'jsp'];
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         
         if (in_array($ext, $dangerousExtensions)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
                 ['files' => ['Dieser Dateityp ist aus Sicherheitsgründen nicht erlaubt.']]
+            );
+        }
+
+        // Check file size (additional check)
+        if ($file->getSize() > 10 * 1024 * 1024) { // 10MB
+            throw new \Illuminate\Validation\ValidationException(
+                validator([], []),
+                ['files' => ['Datei ist zu groß. Maximum: 10 MB.']]
             );
         }
     }

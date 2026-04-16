@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Mein Hinweis - Hinweisgeberportal</title>
-    <link rel="stylesheet" href="/css/portal.css">
+    <link rel="stylesheet" href="/css/modern-portal.css">
     <style>
         .messages-box { height: 320px; overflow-y: auto; padding: 1rem; background: #f9fafb; border: 1px solid var(--border); border-radius: var(--radius); }
     </style>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ __('messages.admin.dashboard') }} - {{ __('messages.common.portal_name') }}</title>
-    <link rel="stylesheet" href="/css/portal.css">
+    <link rel="stylesheet" href="/css/modern-portal.css">
 </head>
 <body>
     <header class="page-header">
@@ -48,26 +48,26 @@
             </div>
         </div>
 
-        <div class="card" style="margin-bottom: 1rem;">
-            <div class="card-body" style="padding: 1rem 1.5rem;">
-                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: space-between;">
-                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                        <span style="font-size: 13px; font-weight: 500; color: var(--text-muted);">{{ __('messages.admin.filter') }}</span>
-                        <select id="statusFilter" class="form-control" style="width: auto;">
+        <div class="card" style="margin-bottom: var(--space-4);">
+            <div class="card-body" style="padding: var(--space-4) var(--space-6);">
+                <div style="display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; justify-content: space-between;">
+                    <div style="display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap;">
+                        <span style="font-size: 0.8125rem; font-weight: 500; color: var(--text-muted);">{{ __('messages.admin.filter') }}</span>
+                        <select id="statusFilter" class="form-control" style="width: auto; min-width: 140px;">
                             <option value="">{{ __('messages.admin.all_status') }}</option>
                             <option value="eingegangen">{{ __('messages.common.status.eingegangen') }}</option>
                             <option value="in_pruefung">{{ __('messages.common.status.in_pruefung') }}</option>
                             <option value="rueckfrage">{{ __('messages.common.status.rueckfrage') }}</option>
                             <option value="abgeschlossen">{{ __('messages.common.status.abgeschlossen') }}</option>
                         </select>
-                        <select id="typeFilter" class="form-control" style="width: auto;">
+                        <select id="typeFilter" class="form-control" style="width: auto; min-width: 140px;">
                             <option value="">{{ __('messages.admin.all_types') }}</option>
                             <option value="anonymous">{{ __('messages.admin.only_anonymous') }}</option>
                             <option value="registered">{{ __('messages.admin.only_registered') }}</option>
                         </select>
                     </div>
                     <button onclick="exportReports()" class="btn btn-secondary btn-sm" title="Als CSV exportieren">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;">
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                             <polyline points="7 10 12 15 17 10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -78,7 +78,7 @@
             </div>
         </div>
 
-        <div class="card">
+        <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
@@ -96,9 +96,9 @@
                     <tr data-status="{{ $report->status }}" data-type="{{ $report->is_anonymous ? 'anonymous' : 'registered' }}">
                         <td style="color: var(--text-muted); font-size: 13px;">#{{ $report->id }}</td>
                         <td>
-                            <div style="font-weight: 500;">{{ Str::limit($report->title, 45) }}</div>
+                            <div style="font-weight: 500; margin-bottom: var(--space-1);">{{ Str::limit($report->title, 45) }}</div>
                             @if($report->unread_messages_count > 0)
-                                <span class="badge badge-red" style="margin-top: 3px;">{{ $report->unread_messages_count }} {{ __('messages.admin.new_badge') }}</span>
+                                <span class="badge badge-red">{{ $report->unread_messages_count }} {{ __('messages.admin.new_badge') }}</span>
                             @endif
                         </td>
                         <td>

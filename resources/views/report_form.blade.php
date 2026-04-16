@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Hinweis einreichen - Hinweisgeberportal</title>
-    <link rel="stylesheet" href="/css/portal.css">
+    <title>{{ __('messages.common.submit_report') }} - {{ __('messages.common.portal_name') }}</title>
+    <link rel="stylesheet" href="/css/modern-portal.css">
     <style>
         body { background: var(--bg); }
 
