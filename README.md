@@ -1,30 +1,39 @@
-# Hinweisgeberportal (HinSchG-konform)
+# Whistleblower Portal (HinSchG Compliant)
 
-A secure Laravel-based whistleblower system compliant with the German Whistleblower Protection Act (HinSchG) and EU directive.
+A secure Laravel-based application for anonymous whistleblowing, compliant with the German Whistleblower Protection Act (HinSchG) and the EU directive.
 
 ---
 
-## 🇩🇪 Deutsche Version
+## 📌 Overview
 
-### 📌 Übersicht
-Das Hinweisgeberportal ermöglicht die **anonyme und sichere Meldung von Fehlverhalten**.  
-Es schützt die Identität der Hinweisgeber und bietet Organisationen Tools zur Verwaltung von Meldungen.
+The Whistleblower Portal enables **secure and anonymous reporting of misconduct**.  
+It protects the identity of whistleblowers while providing organizations with tools to manage and investigate reports.
 
-### ⚙️ Funktionen
-- Anonyme & registrierte Meldungen  
-- Token-basiertes Tracking (`/track/{token}`)  
-- Zwei-Wege-Kommunikation (Chat)  
-- Admin-Dashboard mit Status-Workflow  
-- Datei-Uploads (PDF, DOC, JPG, PNG, TXT)  
-- Audit-Logs & Datenschutz (keine IP-Speicherung)
+---
 
-### 🛠️ Technologie
+## ⚙️ Features
+
+- Anonymous & registered reporting  
+- Secure tracking via token (`/track/{token}`)  
+- Two-way communication (chat system)  
+- Admin dashboard with status workflow  
+- File uploads (PDF, DOC, JPG, PNG, TXT)  
+- Full audit logs  
+- Strong privacy (no IP storage)
+
+---
+
+## 🛠️ Tech Stack
+
 - Laravel (PHP 8.4+)  
 - MySQL / SQLite  
 - Docker & Nginx  
-- Blade Templates (kein Node.js)
+- Blade Templates (no Node.js required)
 
-### 🚀 Schnellstart (Docker)
+---
+
+## 🚀 Quick Start (Docker)
+
 ```bash
 git clone https://github.com/kahmada/hinweisgeberportal.git
 cd hinweisgeberportal
