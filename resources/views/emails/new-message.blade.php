@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <style>
@@ -18,18 +18,18 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Hinweisgeberportal — Neue Nachricht</h1>
+            <h1>{{ __('messages.emails.new_message.heading') }}</h1>
         </div>
 
-        <p>Ein Hinweisgeber hat eine neue Nachricht gesendet.</p>
+        <p>{{ __('messages.emails.new_message.intro') }}</p>
 
         <div style="margin: 20px 0;">
             <div class="row">
-                <div class="label">Hinweis-ID</div>
+                <div class="label">{{ __('messages.emails.new_message.label_id') }}</div>
                 <div class="value">#{{ $report->id }}</div>
             </div>
             <div class="row">
-                <div class="label">Titel</div>
+                <div class="label">{{ __('messages.emails.new_message.label_title') }}</div>
                 <div class="value">{{ $report->title }}</div>
             </div>
         </div>
@@ -38,11 +38,13 @@
             "{{ $messagePreview }}..."
         </div>
 
-        <a href="{{ url('/admin/reports/' . $report->id) }}" class="btn">Nachricht im Portal ansehen</a>
+        <a href="{{ url('/admin/reports/' . $report->id) }}" class="btn">
+            {{ __('messages.emails.new_message.cta') }}
+        </a>
 
         <div class="footer">
-            Diese E-Mail wurde automatisch vom Hinweisgeberportal gesendet.<br>
-            Bitte antworten Sie nicht auf diese E-Mail.
+            {{ __('messages.emails.new_message.footer') }}<br>
+            {{ __('messages.emails.new_message.no_reply') }}
         </div>
     </div>
 </body>

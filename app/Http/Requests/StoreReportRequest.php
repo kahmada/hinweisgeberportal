@@ -28,15 +28,15 @@ class StoreReportRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required'                => 'Bitte geben Sie einen Titel für den Hinweis ein.',
-            'title.min'                     => 'Der Titel muss mindestens 5 Zeichen enthalten.',
-            'title.max'                     => 'Der Titel darf maximal 200 Zeichen enthalten.',
-            'description.required'          => 'Bitte geben Sie eine Beschreibung des Vorfalls ein.',
-            'description.min'               => 'Die Beschreibung muss mindestens 20 Zeichen enthalten.',
-            'description.max'               => 'Die Beschreibung darf maximal 10.000 Zeichen enthalten.',
-            'incident_date.date'            => 'Bitte geben Sie ein gültiges Datum ein.',
-            'incident_date.before_or_equal' => 'Das Vorfallsdatum darf nicht in der Zukunft liegen.',
-            'involved_persons.max'          => 'Die Beschreibung beteiligter Personen darf maximal 2.000 Zeichen enthalten.',
+            'title.required'                => __('messages.validation.title_required'),
+            'title.min'                     => __('messages.validation.title_min'),
+            'title.max'                     => __('messages.validation.title_max'),
+            'description.required'          => __('messages.validation.description_required'),
+            'description.min'               => __('messages.validation.description_min'),
+            'description.max'               => __('messages.validation.description_max'),
+            'incident_date.date'            => __('messages.validation.incident_date_date'),
+            'incident_date.before_or_equal' => __('messages.validation.incident_date_future'),
+            'involved_persons.max'          => __('messages.validation.involved_persons_max'),
         ];
     }
 }

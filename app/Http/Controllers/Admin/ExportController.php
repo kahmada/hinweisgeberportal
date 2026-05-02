@@ -30,7 +30,7 @@ class ExportController extends Controller
 
         $reports = $query->orderBy('created_at', 'desc')->get();
 
-        $filename = 'hinweise_export_' . date('Y-m-d_His') . '.csv';
+        $filename = __('messages.export.filename_prefix') . '_' . date('Y-m-d_His') . '.csv';
 
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
@@ -48,22 +48,24 @@ class ExportController extends Controller
 
             // CSV Headers
             fputcsv($file, [
-                'ID',
-                'Titel',
-                'Gesellschaft',
-                'Art des Verstoßes',
-                'Datum des Vorfalls',
-                'Ort',
-                'Status',
-                'Typ',
-                'Eingereicht am',
-                'Anzahl Nachrichten',
-                'Anzahl Anhänge'
+                __('messages.export.col_id'),
+                __('messages.export.col_title'),
+                __('messages.export.col_company'),
+                __('messages.export.col_violation'),
+                __('messages.export.col_incident_date'),
+                __('messages.export.col_location'),
+                __('messages.export.col_status'),
+                __('messages.export.col_type'),
+                __('messages.export.col_submitted_at'),
+                __('messages.export.col_messages'),
+                __('messages.export.col_attachments'),
             ], ';');
 
             // CSV Data
             foreach ($reports as $report) {
-                $type = $report->is_anonymous ? 'Anonym' : 'Registriert';
+                $type = $report->is_anonymous
+                    ? __('messages.export.type_anonymous')
+                    : __('messages.export.type_registered');
                 
                 fputcsv($file, [
                     $report->id,
@@ -102,18 +104,10 @@ class ExportController extends Controller
     }
 
     /**
-     * Get status label in German
+     * Get translated status label
      */
     private function getStatusLabel(string $status): string
     {
-        $labels = [
-            'eingegangen' => 'Eingegangen',
-            'in_pruefung' => 'In Prüfung',
-            'untersuchung' => 'Untersuchung',
-            'rueckfrage' => 'Rückfrage',
-            'abgeschlossen' => 'Abgeschlossen'
-        ];
-
-        return $labels[$status] ?? $status;
+        return __('messages.common.status.' . $status, [], app()->getLocale()) ?: $status;
     }
 }

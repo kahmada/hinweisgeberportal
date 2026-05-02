@@ -31,10 +31,11 @@ class ActivityLog extends Model
     public function getActionLabelAttribute(): string
     {
         return match($this->action) {
-            'status_changed'    => 'Status geändert',
-            'identity_revealed' => 'Identität enthüllt',
-            'report_accessed'   => 'Hinweis aufgerufen',
-            'message_sent'      => 'Nachricht gesendet',
+            'status_changed'    => __('messages.activity.status_changed'),
+            'identity_revealed' => __('messages.activity.identity_revealed'),
+            'report_accessed'   => __('messages.activity.report_accessed'),
+            'message_sent'      => __('messages.activity.message_sent'),
+            'report_created'    => __('messages.activity.report_created'),
             default             => $this->action,
         };
     }

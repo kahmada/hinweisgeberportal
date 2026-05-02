@@ -70,13 +70,13 @@ class Report extends Model
     public function getAnonymizedUserAttribute()
     {
         if ($this->is_anonymous) {
-            return 'Anonym';
+            return __('messages.admin.anonymous');
         }
 
         if ($this->isIdentityRevealed()) {
-            return $this->user ? $this->user->name . ' (' . $this->user->email . ')' : 'Unbekannt';
+            return $this->user ? $this->user->name . ' (' . $this->user->email . ')' : __('messages.admin.unknown_user');
         }
 
-        return '[Identität geschützt]';
+        return __('messages.admin.protected');
     }
 }

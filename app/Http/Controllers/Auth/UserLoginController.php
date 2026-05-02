@@ -33,7 +33,7 @@ class UserLoginController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Die eingegebenen Zugangsdaten sind ungültig.',
+            'email' => __('messages.responses.login_failed'),
         ])->onlyInput('email');
     }
 

@@ -77,7 +77,7 @@ class MessageController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Messages marked as read',
+            'message' => __('messages.responses.messages_marked_read'),
         ]);
     }
 }

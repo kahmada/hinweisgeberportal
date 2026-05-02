@@ -44,7 +44,7 @@ class AttachmentController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Dateien erfolgreich hochgeladen',
+            'message' => __('messages.attachments.upload_success'),
             'attachments' => $uploadedFiles,
         ], 201);
     }
@@ -58,7 +58,7 @@ class AttachmentController extends Controller
         $path = storage_path('app/attachments/' . $attachment->filename);
 
         if (!file_exists($path)) {
-            abort(404, 'Datei nicht gefunden');
+            abort(404, __('messages.attachments.file_not_found'));
         }
 
         return response()->download($path, $attachment->original_filename, [
@@ -91,7 +91,7 @@ class AttachmentController extends Controller
         if (!in_array($actualMimeType, $allowedMimes)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
-                ['files' => ['Dateityp nicht erlaubt. Nur PDF, DOC, DOCX, JPG, PNG und TXT sind zulässig.']]
+                ['files' => [__('messages.attachments.invalid_mime_type')]]
             );
         }
 
@@ -103,7 +103,7 @@ class AttachmentController extends Controller
         if (in_array($ext, $dangerousExtensions)) {
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
-                ['files' => ['Dieser Dateityp ist aus Sicherheitsgründen nicht erlaubt.']]
+                ['files' => [__('messages.attachments.dangerous_extension')]]
             );
         }
 
@@ -111,7 +111,7 @@ class AttachmentController extends Controller
         if ($file->getSize() > 10 * 1024 * 1024) { // 10MB
             throw new \Illuminate\Validation\ValidationException(
                 validator([], []),
-                ['files' => ['Datei ist zu groß. Maximum: 10 MB.']]
+                ['files' => [__('messages.attachments.file_too_large')]]
             );
         }
     }

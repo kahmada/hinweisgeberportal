@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="UTF-8">
     <style>
@@ -17,35 +17,41 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Hinweisgeberportal — Neuer Hinweis</h1>
+            <h1>{{ __('messages.emails.new_report.heading') }}</h1>
         </div>
 
-        <p>Ein neuer Hinweis wurde eingereicht und wartet auf Bearbeitung.</p>
+        <p>{{ __('messages.emails.new_report.intro') }}</p>
 
         <div style="margin: 20px 0;">
             <div class="row">
-                <div class="label">Hinweis-ID</div>
+                <div class="label">{{ __('messages.emails.new_report.label_id') }}</div>
                 <div class="value">#{{ $report->id }}</div>
             </div>
             <div class="row">
-                <div class="label">Titel</div>
+                <div class="label">{{ __('messages.emails.new_report.label_title') }}</div>
                 <div class="value">{{ $report->title }}</div>
             </div>
             <div class="row">
-                <div class="label">Eingereicht am</div>
-                <div class="value">{{ $report->created_at->format('d.m.Y H:i') }} Uhr</div>
+                <div class="label">{{ __('messages.emails.new_report.label_date') }}</div>
+                <div class="value">{{ $report->created_at->format('d.m.Y H:i') }}</div>
             </div>
             <div class="row">
-                <div class="label">Einreichungsart</div>
-                <div class="value">{{ $report->is_anonymous ? 'Anonym' : 'Registrierter Benutzer' }}</div>
+                <div class="label">{{ __('messages.emails.new_report.label_type') }}</div>
+                <div class="value">
+                    {{ $report->is_anonymous
+                        ? __('messages.emails.new_report.type_anonymous')
+                        : __('messages.emails.new_report.type_registered') }}
+                </div>
             </div>
         </div>
 
-        <a href="{{ url('/admin/reports/' . $report->id) }}" class="btn">Hinweis im Portal ansehen</a>
+        <a href="{{ url('/admin/reports/' . $report->id) }}" class="btn">
+            {{ __('messages.emails.new_report.cta') }}
+        </a>
 
         <div class="footer">
-            Diese E-Mail wurde automatisch vom Hinweisgeberportal gesendet.<br>
-            Bitte antworten Sie nicht auf diese E-Mail.
+            {{ __('messages.emails.new_report.footer') }}<br>
+            {{ __('messages.emails.new_report.no_reply') }}
         </div>
     </div>
 </body>

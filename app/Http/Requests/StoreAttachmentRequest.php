@@ -28,13 +28,13 @@ class StoreAttachmentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'files.required' => 'Bitte wählen Sie mindestens eine Datei aus.',
-            'files.max' => 'Sie können maximal 5 Dateien gleichzeitig hochladen.',
-            'files.*.required' => 'Eine der ausgewählten Dateien ist ungültig.',
-            'files.*.file' => 'Eine der ausgewählten Dateien ist keine gültige Datei.',
-            'files.*.max' => 'Eine oder mehrere Dateien sind größer als 10 MB.',
-            'files.*.mimes' => 'Nur folgende Dateitypen sind erlaubt: PDF, DOC, DOCX, JPG, JPEG, PNG, TXT.',
-            'files.*.mimetypes' => 'Eine oder mehrere Dateien haben einen ungültigen MIME-Type.',
+            'files.required'    => __('messages.attachments.files_required'),
+            'files.max'         => __('messages.attachments.files_max'),
+            'files.*.required'  => __('messages.attachments.file_invalid'),
+            'files.*.file'      => __('messages.attachments.file_not_valid'),
+            'files.*.max'       => __('messages.attachments.file_size_exceeded'),
+            'files.*.mimes'     => __('messages.attachments.file_type_not_allowed'),
+            'files.*.mimetypes' => __('messages.attachments.invalid_mime'),
         ];
     }
 }

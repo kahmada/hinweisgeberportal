@@ -17,7 +17,7 @@ class MessageService
     public function sendMessage(Report $report, string $messageText, string $senderType, ?int $senderId = null): Message
     {
         if ($report->status === 'abgeschlossen') {
-            throw new \Exception('Dieser Hinweis ist abgeschlossen. Neue Nachrichten können nicht mehr gesendet werden.');
+            throw new \Exception(__('messages.responses.report_closed_messages'));
         }
 
         $message = Message::create([

@@ -87,11 +87,11 @@ class ReportService
     public function revealIdentity(Report $report, User $admin): Report
     {
         if ($report->isIdentityRevealed()) {
-            throw new \Exception('Identität wurde bereits enthüllt');
+            throw new \Exception(__('messages.responses.identity_already_revealed'));
         }
 
         if ($report->is_anonymous || !$report->user_id) {
-            throw new \Exception('Keine Identität zum Enthüllen vorhanden');
+            throw new \Exception(__('messages.responses.no_identity_to_reveal'));
         }
 
         $report->update([

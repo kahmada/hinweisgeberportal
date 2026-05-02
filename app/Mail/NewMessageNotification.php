@@ -21,7 +21,7 @@ class NewMessageNotification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Neue Nachricht zu Hinweis #' . $this->report->id,
+            subject: __('messages.emails.new_message.subject', ['id' => $this->report->id]),
         );
     }
 

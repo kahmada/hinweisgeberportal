@@ -36,7 +36,7 @@ class ReportController extends Controller
         if ($isAnonymous) {
             return response()->json([
                 'success' => true,
-                'message' => 'Hinweis erfolgreich eingereicht',
+                'message' => __('messages.responses.report_submitted'),
                 'report_id' => $result['report']->id,
                 'credentials' => [
                     'username' => $result['credentials']['username'],
@@ -44,13 +44,13 @@ class ReportController extends Controller
                     'access_token' => $result['credentials']['token'],
                     'access_url' => url("/track/{$result['credentials']['token']}"),
                 ],
-                'warning' => 'WICHTIG: Speichern Sie diese Zugangsdaten! Sie werden nicht erneut angezeigt.',
+                'warning' => __('messages.responses.credentials_warning'),
             ], 201);
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Hinweis erfolgreich eingereicht',
+            'message' => __('messages.responses.report_submitted'),
             'report' => $result['report'],
         ], 201);
     }
@@ -62,7 +62,7 @@ class ReportController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Report aktualisiert',
+            'message' => __('messages.responses.report_updated'),
             'report' => $report,
         ]);
     }
@@ -74,7 +74,7 @@ class ReportController extends Controller
                        ->first();
 
         if (!$report) {
-            abort(404, 'Ungültiger Zugangslink');
+            abort(404, __('messages.responses.invalid_token'));
         }
 
         return view('track.login', compact('token'));
@@ -93,7 +93,7 @@ class ReportController extends Controller
 
         if (!$report || !Hash::check($validated['password'], $report->anonymous_password)) {
             return back()->withErrors([
-                'credentials' => 'Ungültige Zugangsdaten. Bitte überprüfen Sie Ihren Benutzernamen und Ihr Passwort.'
+                'credentials' => __('messages.responses.invalid_credentials'),
             ])->withInput($request->only('username'));
         }
 
@@ -108,7 +108,7 @@ class ReportController extends Controller
     public function viewReport(int $id)
     {
         if (session('whistleblower_report_id') !== $id) {
-            abort(403, 'Zugriff verweigert');
+            abort(403, __('messages.responses.access_denied'));
         }
 
         $report = Report::with('attachments')->findOrFail($id);
@@ -118,7 +118,7 @@ class ReportController extends Controller
     public function trackLogout()
     {
         session()->forget(['whistleblower_report_id', 'whistleblower_username']);
-        return redirect('/')->with('message', 'Sie wurden erfolgreich abgemeldet.');
+        return redirect('/')->with('message', __('messages.responses.logout_success'));
     }
 
     public function revealIdentity(Request $request, Report $report)
@@ -131,7 +131,7 @@ class ReportController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Identität wurde enthüllt',
+                'message' => __('messages.responses.identity_revealed'),
                 'user' => [
                     'name' => $report->user?->name,
                     'email' => $report->user?->email,
